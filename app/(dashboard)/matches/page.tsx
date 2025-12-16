@@ -12,6 +12,7 @@ import { formatCurrency } from '@/lib/utils'
 export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
+  const [generating, setGenerating] = useState(false)
   const [filter, setFilter] = useState<MatchStatus | 'ALL'>('ALL')
 
   useEffect(() => {
@@ -34,12 +35,40 @@ export default function MatchesPage() {
   }
 
   const handleSuggestMatches = async () => {
-    // This would need a buyer ID - simplified for MVP
     try {
-      const response = await apiClient.post('/matches/suggest?buyerId=xxx&limit=10')
-      setMatches([...matches, ...response.data])
+      setGenerating(true)
+      // Fetch all buyers first
+      const buyersResponse = await apiClient.get('/buyers?limit=100')
+      const buyers = buyersResponse.data.data || []
+      
+      if (buyers.length === 0) {
+        alert('No buyers found. Please add buyers first.')
+        setGenerating(false)
+        return
+      }
+
+      // Generate suggestions for all buyers
+      let totalGenerated = 0
+      for (const buyer of buyers) {
+        try {
+          const response = await apiClient.post(`/matches/suggest?buyerId=${buyer.id}&limit=10`)
+          if (Array.isArray(response.data)) {
+            totalGenerated += response.data.length
+          }
+        } catch (err) {
+          console.error(`Failed to generate suggestions for buyer ${buyer.id}:`, err)
+        }
+      }
+
+      // Refresh the matches list to show new suggestions
+      await fetchMatches()
+      
+      alert(`Generated ${totalGenerated} AI match suggestions!`)
     } catch (error) {
       console.error('Failed to generate suggestions:', error)
+      alert('Failed to generate suggestions. Please try again.')
+    } finally {
+      setGenerating(false)
     }
   }
 
@@ -80,9 +109,9 @@ export default function MatchesPage() {
           <h1 className="text-3xl font-bold">Buyer-Seller Matches</h1>
           <p className="text-gray-600 mt-1">AI-powered matching and deal pipeline</p>
         </div>
-        <Button onClick={handleSuggestMatches}>
+        <Button onClick={handleSuggestMatches} disabled={generating}>
           <Sparkles className="h-4 w-4 mr-2" />
-          Generate AI Suggestions
+          {generating ? 'Generating...' : 'Generate AI Suggestions'}
         </Button>
       </div>
 

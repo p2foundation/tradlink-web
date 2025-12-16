@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, X, ChevronLeft, ChevronRight, Upload, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 import apiClient from '@/lib/api-client'
 import { Farmer } from '@/types'
 import Link from 'next/link'
@@ -14,6 +15,7 @@ import { FilterBar, FilterOption } from '@/components/ui/filter-bar'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function FarmersPage() {
+  const { toast } = useToast()
   const [farmers, setFarmers] = useState<Farmer[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -40,7 +42,10 @@ export default function FarmersPage() {
     farmSize: '',
     certifications: '',
     verified: false,
+    images: [] as string[],
   })
+  const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [uploadingImages, setUploadingImages] = useState(false)
 
   useEffect(() => {
     // Reset to page 1 when filters change
@@ -122,7 +127,37 @@ export default function FarmersPage() {
 
       const res = await apiClient.post('/farmers', payload)
       const created = res.data?.data || res.data
+      
+      // If user is an export company, automatically add farmer to supplier network
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr)
+          if (user.role === 'EXPORT_COMPANY' && created?.id) {
+            try {
+              await apiClient.post('/supplier-networks', {
+                farmerId: created.id,
+                relationshipType: 'DIRECT',
+                notes: 'Added via farmer management',
+              })
+            } catch (networkError) {
+              // If network creation fails, log but don't fail the whole operation
+              console.warn('Failed to add farmer to supplier network:', networkError)
+            }
+          }
+        } catch (parseError) {
+          console.warn('Failed to parse user from localStorage:', parseError)
+        }
+      }
+      
       setFarmers((prev) => [created, ...prev])
+      toast({
+        variant: 'success',
+        title: 'Farmer Added',
+        description: userStr && JSON.parse(userStr).role === 'EXPORT_COMPANY'
+          ? 'Farmer created and added to your supplier network'
+          : 'Farmer created successfully',
+      })
       setShowForm(false)
       setFormData({
         firstName: '',
@@ -136,9 +171,16 @@ export default function FarmersPage() {
         farmSize: '',
         certifications: '',
         verified: false,
+        images: [],
       })
+      setImageFiles([])
     } catch (err: any) {
       setFormError(err?.response?.data?.message || 'Failed to create farmer. Please check required fields.')
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: err?.response?.data?.message || 'Failed to create farmer',
+      })
     } finally {
       setSubmitting(false)
     }
@@ -282,6 +324,99 @@ export default function FarmersPage() {
                     <span className="text-sm text-gray-300">Mark as verified</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Image Upload Section */}
+              <div className="space-y-3">
+                <Label>Farm Images (Optional)</Label>
+                <div className="flex items-center gap-3">
+                  <label className="flex-1">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files || [])
+                        if (files.length > 5) {
+                          toast({
+                            variant: 'destructive',
+                            title: 'Too Many Images',
+                            description: 'Please select up to 5 images only.',
+                          })
+                          return
+                        }
+
+                        setUploadingImages(true)
+                        try {
+                          const imagePromises = files.map((file) => {
+                            return new Promise<string>((resolve) => {
+                              const reader = new FileReader()
+                              reader.onloadend = () => {
+                                resolve(reader.result as string)
+                              }
+                              reader.readAsDataURL(file)
+                            })
+                          })
+
+                          const imageUrls = await Promise.all(imagePromises)
+                          setImageFiles(files)
+                          setFormData({
+                            ...formData,
+                            images: [...formData.images, ...imageUrls].slice(0, 5),
+                          })
+                        } catch (error) {
+                          toast({
+                            variant: 'destructive',
+                            title: 'Upload Failed',
+                            description: 'Failed to process images. Please try again.',
+                          })
+                        } finally {
+                          setUploadingImages(false)
+                        }
+                      }}
+                      className="bg-slate-800 border-slate-700 text-slate-100 cursor-pointer"
+                      disabled={uploadingImages || formData.images.length >= 5}
+                    />
+                  </label>
+                </div>
+
+                {/* Image Preview Grid */}
+                {formData.images.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {formData.images.map((imageUrl, index) => (
+                      <div key={index} className="relative group">
+                        <div className="relative aspect-square rounded-lg overflow-hidden border border-slate-700 bg-slate-800">
+                          <img
+                            src={imageUrl}
+                            alt={`Farm image ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImages = formData.images.filter((_, i) => i !== index)
+                              setFormData({ ...formData, images: newImages })
+                              setImageFiles(imageFiles.filter((_, i) => i !== index))
+                            }}
+                            className="absolute top-1 right-1 p-1 bg-red-600/90 hover:bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            aria-label={`Remove image ${index + 1}`}
+                          >
+                            <X className="h-3 w-3 text-white" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {formData.images.length === 0 && (
+                  <div className="border-2 border-dashed border-slate-700 rounded-lg p-6 text-center">
+                    <ImageIcon className="h-8 w-8 mx-auto text-gray-500 mb-2" />
+                    <p className="text-sm text-gray-400">
+                      No images yet. Upload photos of your farm to showcase your operation.
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 <Button type="submit" disabled={submitting}>

@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import apiClient from '@/lib/api-client'
 import { Buyer } from '@/types'
 import Link from 'next/link'
@@ -15,10 +17,21 @@ export default function BuyersPage() {
   const [search, setSearch] = useState('')
   const [countryFilter, setCountryFilter] = useState<string | null>(null)
   const [industryFilter, setIndustryFilter] = useState<string | null>(null)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+  })
+
+  useEffect(() => {
+    // Reset to page 1 when filters change
+    setPagination((prev) => ({ ...prev, page: 1 }))
+  }, [countryFilter, industryFilter])
 
   useEffect(() => {
     fetchBuyers()
-  }, [countryFilter, industryFilter])
+  }, [countryFilter, industryFilter, pagination.page])
 
   const fetchBuyers = async () => {
     try {
@@ -26,11 +39,19 @@ export default function BuyersPage() {
       const params = new URLSearchParams()
       if (countryFilter) params.append('country', countryFilter)
       if (industryFilter) params.append('industry', industryFilter)
-      params.append('page', '1')
-      params.append('limit', '20')
+      params.append('page', pagination.page.toString())
+      params.append('limit', pagination.limit.toString())
 
       const response = await apiClient.get(`/buyers?${params.toString()}`)
       setBuyers(response.data.data || [])
+      if (response.data.meta) {
+        setPagination({
+          page: response.data.meta.page || pagination.page,
+          limit: response.data.meta.limit || pagination.limit,
+          total: response.data.meta.total || 0,
+          totalPages: response.data.meta.totalPages || 0,
+        })
+      }
     } catch (error) {
       console.error('Failed to fetch buyers:', error)
     } finally {
@@ -152,9 +173,65 @@ export default function BuyersPage() {
         ))}
       </div>
 
-      {filteredBuyers.length === 0 && (
+      {filteredBuyers.length === 0 && !loading && (
         <div className="text-center py-12 text-gray-400">
           No buyers found. Try adjusting your search or filters.
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+          <div className="text-sm text-gray-400">
+            Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} buyers
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+              disabled={pagination.page === 1 || loading}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                let pageNum: number
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1
+                } else if (pagination.page <= 3) {
+                  pageNum = i + 1
+                } else if (pagination.page >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i
+                } else {
+                  pageNum = pagination.page - 2 + i
+                }
+                return (
+                  <Button
+                    key={pageNum}
+                    variant={pagination.page === pageNum ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPagination({ ...pagination, page: pageNum })}
+                    disabled={loading}
+                    className="min-w-[40px]"
+                  >
+                    {pageNum}
+                  </Button>
+                )
+              })}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+              disabled={pagination.page === pagination.totalPages || loading}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -25,6 +25,9 @@ import { formatDate } from '@/lib/utils'
 import apiClient from '@/lib/api-client'
 import { UserRole } from '@/types'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/hooks/use-toast'
+import { UserViewDialog } from '@/components/users/user-view-dialog'
+import { UserEditDialog } from '@/components/users/user-edit-dialog'
 
 interface User {
   id: string
@@ -39,6 +42,7 @@ interface User {
 }
 
 export default function UsersPage() {
+  const { toast } = useToast()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -46,11 +50,28 @@ export default function UsersPage() {
   const [verifiedFilter, setVerifiedFilter] = useState<'ALL' | 'true' | 'false'>('ALL')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [viewDialogOpen, setViewDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [userDetails, setUserDetails] = useState<any>(null)
   const itemsPerPage = 20
 
   useEffect(() => {
     fetchUsers()
   }, [currentPage, roleFilter, verifiedFilter])
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentPage === 1) {
+        fetchUsers()
+      } else {
+        setCurrentPage(1)
+      }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [search])
 
   const fetchUsers = async () => {
     try {
@@ -58,86 +79,97 @@ export default function UsersPage() {
       const params = new URLSearchParams()
       if (roleFilter !== 'ALL') params.append('role', roleFilter)
       if (verifiedFilter !== 'ALL') params.append('verified', verifiedFilter)
+      if (search) params.append('search', search)
       params.append('page', currentPage.toString())
       params.append('limit', itemsPerPage.toString())
 
-      // TODO: Replace with actual API endpoint
-      // const response = await apiClient.get(`/admin/users?${params.toString()}`)
+      const response = await apiClient.get(`/users?${params.toString()}`)
+      const data = response.data.data || []
+      const meta = response.data.meta || {}
       
-      // Mock data
-      const mockUsers: User[] = Array.from({ length: 50 }, (_, i) => {
-        const roles: UserRole[] = [UserRole.FARMER, UserRole.BUYER, UserRole.EXPORT_COMPANY, UserRole.ADMIN]
-        return {
-          id: `user-${i + 1}`,
-          email: `user${i + 1}@example.com`,
-          firstName: `User${i + 1}`,
-          lastName: `Last${i + 1}`,
-          role: roles[i % roles.length],
-          phone: `+233${200000000 + i}`,
-          verified: i % 3 === 0,
-          createdAt: new Date(Date.now() - i * 86400000).toISOString(),
-          updatedAt: new Date(Date.now() - i * 86400000).toISOString(),
-        }
-      })
-      
-      setUsers(mockUsers)
-      setTotalPages(Math.ceil(mockUsers.length / itemsPerPage))
+      setUsers(data)
+      setTotalPages(meta.totalPages || 1)
     } catch (error) {
       console.error('Failed to fetch users:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to load users',
+      })
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredUsers = useMemo(() => {
-    let filtered = users
+  // Users are already filtered and paginated by the API
+  const paginatedUsers = users
 
-    if (search) {
-      const term = search.toLowerCase()
-      filtered = filtered.filter(
-        (user) =>
-          user.email.toLowerCase().includes(term) ||
-          user.firstName.toLowerCase().includes(term) ||
-          user.lastName.toLowerCase().includes(term)
-      )
+  const handleView = async (user: User) => {
+    try {
+      const response = await apiClient.get(`/users/${user.id}`)
+      setUserDetails(response.data)
+      setSelectedUser(user)
+      setViewDialogOpen(true)
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to load user details',
+      })
     }
+  }
 
-    if (roleFilter !== 'ALL') {
-      filtered = filtered.filter((user) => user.role === roleFilter)
-    }
-
-    if (verifiedFilter !== 'ALL') {
-      filtered = filtered.filter((user) => user.verified === (verifiedFilter === 'true'))
-    }
-
-    return filtered
-  }, [users, search, roleFilter, verifiedFilter])
-
-  const paginatedUsers = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage
-    const end = start + itemsPerPage
-    return filteredUsers.slice(start, end)
-  }, [filteredUsers, currentPage])
+  const handleEdit = (user: User) => {
+    setSelectedUser(user)
+    setEditDialogOpen(true)
+  }
 
   const handleVerify = async (userId: string) => {
     try {
-      // TODO: Replace with actual API endpoint
-      // await apiClient.patch(`/admin/users/${userId}/verify`, { verified: true })
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, verified: true } : u)))
-    } catch (error) {
-      console.error('Failed to verify user:', error)
+      const user = users.find((u) => u.id === userId)
+      if (!user) return
+
+      await apiClient.post(`/users/${userId}/verify`, { verified: !user.verified })
+      
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, verified: !u.verified } : u)))
+      
+      toast({
+        variant: 'success',
+        title: 'Verification Updated',
+        description: `User has been ${!user.verified ? 'verified' : 'unverified'}`,
+      })
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to update verification status',
+      })
     }
   }
 
   const handleDelete = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return
+    
     try {
-      // TODO: Replace with actual API endpoint
-      // await apiClient.delete(`/admin/users/${userId}`)
+      await apiClient.delete(`/users/${userId}`)
       setUsers((prev) => prev.filter((u) => u.id !== userId))
-    } catch (error) {
-      console.error('Failed to delete user:', error)
+      
+      toast({
+        variant: 'success',
+        title: 'User Deleted',
+        description: 'User has been deleted successfully',
+      })
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to delete user',
+      })
     }
+  }
+
+  const handleEditSuccess = () => {
+    fetchUsers()
   }
 
   const getRoleBadge = (role: UserRole) => {
@@ -154,17 +186,27 @@ export default function UsersPage() {
     )
   }
 
-  const stats = useMemo(() => {
-    return {
-      total: users.length,
-      farmers: users.filter((u) => u.role === UserRole.FARMER).length,
-      buyers: users.filter((u) => u.role === UserRole.BUYER).length,
-      exportCompanies: users.filter((u) => u.role === UserRole.EXPORT_COMPANY).length,
-      admins: users.filter((u) => u.role === UserRole.ADMIN).length,
-      verified: users.filter((u) => u.verified).length,
-      unverified: users.filter((u) => !u.verified).length,
+  const [stats, setStats] = useState({
+    total: 0,
+    farmers: 0,
+    buyers: 0,
+    exportCompanies: 0,
+    admins: 0,
+    verified: 0,
+    unverified: 0,
+  })
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await apiClient.get('/users/stats')
+        setStats(response.data || stats)
+      } catch (error) {
+        console.error('Failed to fetch stats:', error)
+      }
     }
-  }, [users])
+    fetchStats()
+  }, [])
 
   return (
     <div className="space-y-6 text-slate-100">
@@ -202,7 +244,7 @@ export default function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{stats.farmers}</div>
-            <p className="text-xs text-gray-400 mt-1">{((stats.farmers / stats.total) * 100).toFixed(1)}% of total</p>
+            <p className="text-xs text-gray-400 mt-1">{stats.total > 0 ? ((stats.farmers / stats.total) * 100).toFixed(1) : 0}% of total</p>
           </CardContent>
         </Card>
 
@@ -213,7 +255,7 @@ export default function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{stats.buyers}</div>
-            <p className="text-xs text-gray-400 mt-1">{((stats.buyers / stats.total) * 100).toFixed(1)}% of total</p>
+            <p className="text-xs text-gray-400 mt-1">{stats.total > 0 ? ((stats.buyers / stats.total) * 100).toFixed(1) : 0}% of total</p>
           </CardContent>
         </Card>
 
@@ -273,7 +315,7 @@ export default function UsersPage() {
       {/* Users Table */}
       <Card className="bg-slate-900 border-white/10">
         <CardHeader>
-          <CardTitle className="text-white">Users ({filteredUsers.length})</CardTitle>
+          <CardTitle className="text-white">Users ({users.length})</CardTitle>
           <CardDescription className="text-gray-400">Manage user accounts and permissions</CardDescription>
         </CardHeader>
         <CardContent>
@@ -358,6 +400,7 @@ export default function UsersPage() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => handleView(user)}
                               className="text-gray-400 hover:text-white"
                               title="View Details"
                             >
@@ -366,6 +409,7 @@ export default function UsersPage() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => handleEdit(user)}
                               className="text-gray-400 hover:text-white"
                               title="Edit User"
                             >
@@ -392,8 +436,8 @@ export default function UsersPage() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
                   <p className="text-sm text-gray-400">
-                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of{' '}
-                    {filteredUsers.length} users
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, users.length)} of{' '}
+                    {users.length} users
                   </p>
                   <div className="flex items-center gap-2">
                     <Button
@@ -428,6 +472,25 @@ export default function UsersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* View Dialog */}
+      {userDetails && (
+        <UserViewDialog
+          user={userDetails}
+          open={viewDialogOpen}
+          onOpenChange={setViewDialogOpen}
+        />
+      )}
+
+      {/* Edit Dialog */}
+      {selectedUser && (
+        <UserEditDialog
+          user={selectedUser}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </div>
   )
 }

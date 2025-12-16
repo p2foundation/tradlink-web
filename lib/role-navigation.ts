@@ -64,8 +64,8 @@ export const getNavigationByRole = (role: UserRole): NavItem[] => {
     case UserRole.EXPORT_COMPANY:
       return [
         { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { href: '/dashboard/farmers', label: 'Supplier Network', icon: Users },
-        { href: '/dashboard/listings', label: 'Order Management', icon: ShoppingBag },
+        { href: '/dashboard/supplier-network', label: 'Supplier Network', icon: Users },
+        { href: '/dashboard/bulk-procurement', label: 'Bulk Procurement', icon: ShoppingBag },
         { href: '/dashboard/logistics', label: 'Logistics', icon: Truck },
         { href: '/dashboard/negotiations', label: 'Negotiations', icon: MessageSquareText },
         { href: '/dashboard/compliance', label: 'Compliance', icon: CheckCircle2 },

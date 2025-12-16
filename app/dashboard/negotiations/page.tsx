@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { MessageSquareText, ArrowRight, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
+import { MessageSquareText, ArrowRight, Clock, CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 import apiClient from '@/lib/api-client'
 import { formatDate } from '@/lib/utils'
 import { useCurrency } from '@/contexts/currency-context'
@@ -53,6 +53,12 @@ export default function NegotiationsPage() {
   const [negotiations, setNegotiations] = useState<Negotiation[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+  })
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -60,13 +66,25 @@ export default function NegotiationsPage() {
       setUser(JSON.parse(storedUser))
     }
     fetchNegotiations()
-  }, [])
+  }, [pagination.page])
 
   const fetchNegotiations = async () => {
     try {
       setLoading(true)
-      const response = await apiClient.get('/negotiations')
+      const params = new URLSearchParams()
+      params.append('page', pagination.page.toString())
+      params.append('limit', pagination.limit.toString())
+      
+      const response = await apiClient.get(`/negotiations?${params.toString()}`)
       setNegotiations(response.data.data || response.data || [])
+      if (response.data.meta) {
+        setPagination({
+          page: response.data.meta.page || pagination.page,
+          limit: response.data.meta.limit || pagination.limit,
+          total: response.data.meta.total || 0,
+          totalPages: response.data.meta.totalPages || 0,
+        })
+      }
     } catch (error: any) {
       console.error('Failed to fetch negotiations:', error)
       toast({
@@ -220,6 +238,62 @@ export default function NegotiationsPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+          <div className="text-sm text-gray-400">
+            Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} negotiations
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+              disabled={pagination.page === 1 || loading}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                let pageNum: number
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1
+                } else if (pagination.page <= 3) {
+                  pageNum = i + 1
+                } else if (pagination.page >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i
+                } else {
+                  pageNum = pagination.page - 2 + i
+                }
+                return (
+                  <Button
+                    key={pageNum}
+                    variant={pagination.page === pageNum ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPagination({ ...pagination, page: pageNum })}
+                    disabled={loading}
+                    className="min-w-[40px]"
+                  >
+                    {pageNum}
+                  </Button>
+                )
+              })}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+              disabled={pagination.page === pagination.totalPages || loading}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
     </div>
