@@ -42,7 +42,7 @@ export function TransactionRow({
   const { formatCurrency } = useCurrency()
   return (
     <Link href={`/dashboard/transactions/${id}`}>
-      <Card className="hover:shadow-glow transition-shadow bg-slate-900 border-white/10 text-slate-100 cursor-pointer">
+      <Card className="hover:shadow-glow transition-shadow cursor-pointer">
         <CardContent className="p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3 flex-1">
@@ -51,25 +51,25 @@ export function TransactionRow({
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-lg">Transaction #{id.slice(0, 8)}</h3>
+                  <h3 className="font-semibold text-lg text-foreground">Transaction #{id.slice(0, 8)}</h3>
                 </div>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {crop ?? '—'} {quantity ? `• ${quantity}` : ''} {buyer ? `• ${buyer}` : ''}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mt-3">
                   {pricePerUnit !== undefined && (
                     <div>
-                      <span className="font-medium text-white">Price:</span>{' '}
-                      <span className="text-gray-300">{formatCurrency(pricePerUnit)}/{quantity?.split(' ').pop() ?? 'unit'}</span>
+                      <span className="font-medium text-foreground">Price:</span>{' '}
+                      <span className="text-muted-foreground">{formatCurrency(pricePerUnit)}/{quantity?.split(' ').pop() ?? 'unit'}</span>
                     </div>
                   )}
                   <div>
-                    <span className="font-medium text-white">Total Value:</span>{' '}
+                    <span className="font-medium text-foreground">Total Value:</span>{' '}
                     <span className="text-emerald-400">{formatCurrency(totalValue)}</span>
                   </div>
                   <div>
-                    <span className="font-medium text-white">Date:</span>{' '}
-                    <span className="text-gray-300">{formatDate(date)}</span>
+                    <span className="font-medium text-foreground">Date:</span>{' '}
+                    <span className="text-muted-foreground">{formatDate(date)}</span>
                   </div>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -25,6 +25,27 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [videoError, setVideoError] = useState(false)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Check if video file exists on mount
+  useEffect(() => {
+    const checkVideo = async () => {
+      try {
+        const response = await fetch('/videos/hero-page_video.mp4', { method: 'HEAD' })
+        if (!response.ok) {
+          console.warn('Video file not found at /videos/hero-page_video.mp4')
+          setVideoError(true)
+        } else {
+          console.log('Video file found, loading...')
+        }
+      } catch (error) {
+        console.warn('Error checking video file:', error)
+      }
+    }
+    checkVideo()
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,6 +60,87 @@ export default function Home() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Ensure video plays when loaded and restarts when it ends
+  useEffect(() => {
+    if (videoRef.current && videoLoaded && !videoError) {
+      const video = videoRef.current
+      
+      // Ensure video plays
+      video.play().catch(() => {
+        // Silently fail and show fallback image
+        setVideoError(true)
+      })
+
+      // Add event listener to ensure continuous looping
+      const handleEnded = () => {
+        if (video && !video.error) {
+          video.currentTime = 0
+          video.play().catch((err) => {
+            console.warn('Video restart failed:', err)
+          })
+        }
+      }
+
+      video.addEventListener('ended', handleEnded)
+      
+      return () => {
+        video.removeEventListener('ended', handleEnded)
+      }
+    }
+  }, [videoLoaded, videoError])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Auto-fallback: Only if video hasn't started loading at all after 15 seconds
+  useEffect(() => {
+    const fallbackTimer = setTimeout(() => {
+      if (!videoLoaded && !videoError && videoRef.current) {
+        // Check if video has actually started loading (networkState > 0 means it's trying)
+        const networkState = videoRef.current.networkState
+        const readyState = videoRef.current.readyState
+        
+        // Only show fallback if video hasn't started loading at all
+        if (networkState === 0 && readyState === 0) {
+          console.log('Video timeout - no loading activity detected, showing fallback image')
+          setVideoError(true)
+        } else {
+          // Video is loading, give it more time
+          console.log('Video is loading (networkState:', networkState, 'readyState:', readyState, ') - waiting longer...')
+        }
+      }
+    }, 15000) // Increased to 15 seconds
+    return () => clearTimeout(fallbackTimer)
+  }, [videoLoaded, videoError])
+  
+  // Force video to play when component mounts
+  useEffect(() => {
+    if (videoRef.current && !videoError) {
+      const playPromise = videoRef.current.play()
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.warn('Video autoplay prevented:', error)
+          // Try to play again after user interaction
+          const handleUserInteraction = () => {
+            if (videoRef.current) {
+              videoRef.current.play().catch(() => {})
+            }
+            document.removeEventListener('click', handleUserInteraction)
+            document.removeEventListener('scroll', handleUserInteraction)
+          }
+          document.addEventListener('click', handleUserInteraction, { once: true })
+          document.addEventListener('scroll', handleUserInteraction, { once: true })
+        })
+      }
+    }
+  }, [videoError])
 
   const heroSlideStyle = {
     transform: `translateY(${-scrollProgress * 100}%)`,
@@ -107,28 +209,113 @@ export default function Home() {
         style={heroSlideStyle}
       >
         {/* Video Background */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Video Background with Fallback */}
           {!videoError ? (
             <video
+              ref={videoRef}
               autoPlay
               loop
               muted
               playsInline
-              className="absolute inset-0 w-full h-full object-cover"
+              preload="metadata"
+              className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
               poster="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1920&q=80"
-              onError={() => setVideoError(true)}
+              crossOrigin="anonymous"
+              onError={(e) => {
+                const error = videoRef.current?.error
+                if (error) {
+                  console.error('Video error:', {
+                    code: error.code,
+                    message: error.message,
+                    networkState: videoRef.current?.networkState,
+                    readyState: videoRef.current?.readyState
+                  })
+                }
+                // Give it a moment to try loading, then show fallback
+                if (errorTimeoutRef.current) {
+                  clearTimeout(errorTimeoutRef.current)
+                }
+                errorTimeoutRef.current = setTimeout(() => {
+                  if (videoRef.current?.error) {
+                    console.log('Video failed to load, showing fallback image')
+                    setVideoError(true)
+                  }
+                }, 3000)
+              }}
+              onLoadedData={() => {
+                console.log('✅ Video loaded successfully')
+                setVideoLoaded(true)
+                setVideoError(false) // Clear any error state
+                if (videoRef.current) {
+                  const playPromise = videoRef.current.play()
+                  if (playPromise !== undefined) {
+                    playPromise.catch((err) => {
+                      console.warn('Video play failed:', err)
+                      // Don't set error immediately, video might play after user interaction
+                    })
+                  }
+                }
+              }}
+              onCanPlay={() => {
+                console.log('✅ Video can play')
+                setVideoLoaded(true)
+                setVideoError(false) // Clear any error state
+                if (videoRef.current && videoRef.current.paused) {
+                  videoRef.current.play().catch((err) => {
+                    console.warn('Video autoplay prevented:', err)
+                  })
+                }
+              }}
+              onCanPlayThrough={() => {
+                console.log('✅ Video can play through (fully loaded)')
+                setVideoLoaded(true)
+                setVideoError(false) // Clear any error state
+              }}
+              onLoadStart={() => {
+                console.log('🔄 Video loading started...')
+                // Video has started loading, clear any pending timeouts
+                setVideoError(false)
+              }}
+              onWaiting={() => {
+                console.log('⏳ Video waiting for data...')
+                // Video is waiting for more data, but it's loading - don't show error
+              }}
+              onLoadedMetadata={() => {
+                console.log('📊 Video metadata loaded')
+                // Metadata loaded means video is definitely loading
+                setVideoError(false)
+              }}
+              onProgress={() => {
+                if (videoRef.current) {
+                  const buffered = videoRef.current.buffered
+                  if (buffered.length > 0) {
+                    const loaded = (buffered.end(0) / videoRef.current.duration) * 100
+                    if (loaded > 10 && videoRef.current.paused) {
+                      videoRef.current.play().catch(() => {})
+                    }
+                  }
+                }
+              }}
+              onEnded={() => {
+                // Explicitly restart video when it ends to ensure continuous playback
+                if (videoRef.current) {
+                  videoRef.current.currentTime = 0
+                  videoRef.current.play().catch((err) => {
+                    console.warn('Video restart failed:', err)
+                  })
+                }
+              }}
+              onTimeUpdate={() => {
+                // Ensure video continues playing if it somehow pauses
+                if (videoRef.current && videoRef.current.paused && !videoRef.current.ended) {
+                  videoRef.current.play().catch(() => {})
+                }
+              }}
             >
-              {/* Primary: Shipping Containers at Port - Export/Import Theme */}
-              <source
-                src="https://videos.pexels.com/video-files/2491284/2491284-hd_1920_1080_25fps.mp4"
-                type="video/mp4"
-              />
-              {/* Alternative: Cargo Ship Loading/Unloading */}
-              <source
-                src="https://videos.pexels.com/video-files/3045163/3045163-hd_1920_1080_30fps.mp4"
-                type="video/mp4"
-              />
+              {/* Local video file */}
+              <source src="/videos/hero-page_video.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
             </video>
           ) : (
             /* Fallback: Shipping Container Terminal Image - Perfect match for export/import theme */
@@ -140,43 +327,54 @@ export default function Home() {
             />
           )}
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
+          {/* Loading overlay (shows poster until video loads or error occurs) */}
+          {!videoLoaded && !videoError && (
+            <div
+              className="absolute inset-0 w-full h-full bg-cover bg-center z-10"
+              style={{
+                backgroundImage: "url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1920&q=80')",
+              }}
+            />
+          )}
+          
+          {/* Gradient Overlay - Reduced opacity to see video better */}
+          {/* pointer-events-none ensures overlays don't block clicks */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/50 to-slate-950/70 z-20 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent z-20 pointer-events-none" />
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-6xl w-full px-6 text-center space-y-8">
+        {/* Hero Content - Higher z-index to ensure it's above everything and clickable */}
+        <div className="relative z-30 max-w-6xl w-full px-6 text-center space-y-8">
           <div className="space-y-4">
-            <p className="text-sm uppercase tracking-[0.3em] text-primary font-semibold">
+            <p className="text-sm uppercase tracking-[0.3em] text-emerald-400 font-semibold drop-shadow-lg">
               TradeLink+
             </p>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight bg-gradient-to-r from-white via-emerald-100 to-emerald-400 bg-clip-text text-transparent">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight bg-gradient-to-r from-white via-emerald-100 to-emerald-400 bg-clip-text text-transparent drop-shadow-2xl">
               AI-Driven MSME Export Platform
             </h1>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-200">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white drop-shadow-lg">
               Connecting Ghana to the World
             </h2>
-            <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
               Empower smallholder farmers and export companies with real-time market insights, 
               secure transactions, and direct access to international buyers.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/register">
+            <Link href="/register" className="relative z-40">
               <Button 
                 size="lg" 
-                className="shadow-glow text-lg px-8 py-6 h-auto bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="shadow-glow text-lg px-8 py-6 h-auto bg-emerald-600 hover:bg-emerald-700 text-white relative z-40"
               >
                 Get Started Free
               </Button>
             </Link>
-            <Link href="/login">
+            <Link href="/login" className="relative z-40">
               <Button 
                 size="lg"
                 variant="outline" 
-                className="text-lg px-8 py-6 h-auto border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+                className="text-lg px-8 py-6 h-auto border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:border-white/70 relative z-40 shadow-lg"
               >
                 Sign In
               </Button>
@@ -184,20 +382,20 @@ export default function Home() {
           </div>
 
           {/* Feature Badges */}
-          <div className="flex flex-wrap gap-3 justify-center text-sm">
-            <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-slate-200">
+          <div className="flex flex-wrap gap-3 justify-center text-sm relative z-40">
+            <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/15 backdrop-blur-md px-4 py-2 text-white shadow-lg">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" />
               Live market insights
             </span>
-            <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-slate-200">
+            <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/15 backdrop-blur-md px-4 py-2 text-white shadow-lg">
               <CheckCircle2 className="h-4 w-4 text-cyan-400" />
               Secure payments
             </span>
-            <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-slate-200">
+            <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/15 backdrop-blur-md px-4 py-2 text-white shadow-lg">
               <CheckCircle2 className="h-4 w-4 text-amber-300" />
               Verified partners
             </span>
-            <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-slate-200">
+            <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/15 backdrop-blur-md px-4 py-2 text-white shadow-lg">
               <CheckCircle2 className="h-4 w-4 text-purple-400" />
               AI-powered matching
             </span>

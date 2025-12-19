@@ -1,18 +1,18 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { useEffect, useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Plus, X, ChevronLeft, ChevronRight, Upload, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPin, ShieldCheck, Package, Users, Search, Filter, UserPlus } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import apiClient from '@/lib/api-client'
-import { Farmer } from '@/types'
+import { Farmer, UserRole } from '@/types'
 import Link from 'next/link'
 import { FilterBar, FilterOption } from '@/components/ui/filter-bar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { AddSupplierDialog } from '@/components/suppliers/add-supplier-dialog'
 
 export default function FarmersPage() {
   const { toast } = useToast()
@@ -21,40 +21,104 @@ export default function FarmersPage() {
   const [search, setSearch] = useState('')
   const [regionFilter, setRegionFilter] = useState<string | null>(null)
   const [verifiedFilter, setVerifiedFilter] = useState<string | null>(null)
+  const [user, setUser] = useState<any>(null)
+  const [selectedFarmer, setSelectedFarmer] = useState<Farmer | null>(null)
+  const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [existingSupplierIds, setExistingSupplierIds] = useState<Set<string>>(new Set())
+  const [stats, setStats] = useState({
+    total: 0,
+    verified: 0,
+    withListings: 0,
+  })
+  const [statsLoading, setStatsLoading] = useState(true)
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 20,
+    limit: 12,
     total: 0,
     totalPages: 0,
   })
-  const [showForm, setShowForm] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [formError, setFormError] = useState('')
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    businessName: '',
-    location: '',
-    region: '',
-    district: '',
-    farmSize: '',
-    certifications: '',
-    verified: false,
-    images: [] as string[],
-  })
-  const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [uploadingImages, setUploadingImages] = useState(false)
 
   useEffect(() => {
-    // Reset to page 1 when filters change
-    setPagination((prev) => ({ ...prev, page: 1 }))
-  }, [regionFilter, verifiedFilter])
+    // Load current user to check role
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      const userData = JSON.parse(storedUser)
+      setUser(userData)
+      
+      // If export company, fetch existing suppliers to show which farmers are already added
+      if (userData.role === UserRole.EXPORT_COMPANY) {
+        fetchExistingSuppliers()
+      }
+    }
+  }, [])
 
   useEffect(() => {
     fetchFarmers()
-  }, [regionFilter, verifiedFilter, pagination.page])
+  }, [regionFilter, verifiedFilter, pagination.page, search])
+
+  useEffect(() => {
+    fetchStats()
+  }, [])
+
+  const fetchExistingSuppliers = async () => {
+    try {
+      const response = await apiClient.get('/supplier-networks')
+      const networks = response.data.data || []
+      const farmerIds = new Set(networks.map((n: any) => n.farmerId))
+      setExistingSupplierIds(farmerIds)
+    } catch (error) {
+      console.error('Failed to fetch existing suppliers:', error)
+    }
+  }
+
+  const handleAddSupplier = (farmer: Farmer) => {
+    setSelectedFarmer(farmer)
+    setAddDialogOpen(true)
+  }
+
+  const handleAddSuccess = () => {
+    fetchExistingSuppliers()
+    fetchFarmers() // Refresh the list
+  }
+
+  // Update stats when farmers are loaded
+  useEffect(() => {
+    if (farmers.length > 0) {
+      const verified = farmers.filter((f) => f.user?.verified).length
+      const withListings = farmers.filter((f) => f.listings && f.listings.length > 0).length
+      setStats((prev) => ({
+        ...prev,
+        verified: prev.verified || verified, // Only update if not set
+        withListings: prev.withListings || withListings, // Only update if not set
+      }))
+    }
+  }, [farmers])
+
+  const fetchStats = async () => {
+    try {
+      setStatsLoading(true)
+      const statsResponse = await apiClient.get('/farmers/stats')
+      if (statsResponse.data) {
+        setStats({
+          total: statsResponse.data.total || 0,
+          verified: 0, // Will be calculated from current page if needed
+          withListings: 0, // Will be calculated from current page if needed
+        })
+      }
+    } catch (error) {
+      console.warn('Failed to fetch stats:', error)
+      // Fallback: use pagination total if available
+      if (pagination.total > 0) {
+        setStats({
+          total: pagination.total,
+          verified: 0,
+          withListings: 0,
+        })
+      }
+    } finally {
+      setStatsLoading(false)
+    }
+  }
 
   const fetchFarmers = async () => {
     try {
@@ -62,6 +126,7 @@ export default function FarmersPage() {
       const params = new URLSearchParams()
       if (regionFilter) params.append('region', regionFilter)
       if (verifiedFilter) params.append('verified', verifiedFilter)
+      if (search) params.append('search', search)
       params.append('page', pagination.page.toString())
       params.append('limit', pagination.limit.toString())
 
@@ -75,493 +140,337 @@ export default function FarmersPage() {
           totalPages: response.data.meta.totalPages || 0,
         })
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch farmers:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to load farmers',
+      })
     } finally {
       setLoading(false)
     }
   }
 
   const regionOptions: FilterOption[] = [
+    { label: 'All Regions', value: '' },
     { label: 'Ashanti', value: 'Ashanti' },
     { label: 'Greater Accra', value: 'Greater Accra' },
     { label: 'Western', value: 'Western' },
+    { label: 'Eastern', value: 'Eastern' },
+    { label: 'Central', value: 'Central' },
+    { label: 'Volta', value: 'Volta' },
+    { label: 'Northern', value: 'Northern' },
   ]
 
   const verifiedOptions: FilterOption[] = [
-    { label: 'Verified', value: 'true' },
+    { label: 'All', value: '' },
+    { label: 'Verified Only', value: 'true' },
     { label: 'Unverified', value: 'false' },
   ]
 
-  const filteredFarmers = useMemo(() => {
-    const term = search.toLowerCase()
-    return farmers.filter((farmer) => {
-      const text = `${farmer.businessName ?? ''} ${farmer.location ?? ''} ${farmer.region ?? ''} ${farmer.district ?? ''} ${farmer.user?.firstName ?? ''} ${farmer.user?.lastName ?? ''}`.toLowerCase()
-      return term ? text.includes(term) : true
-    })
-  }, [farmers, search])
-
-  const handleAddFarmer = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    setFormError('')
-    setSubmitting(true)
-    try {
-      const payload = {
-        businessName: formData.businessName || undefined,
-        location: formData.location,
-        district: formData.district,
-        region: formData.region,
-        gpsAddress: undefined,
-        farmSize: formData.farmSize ? Number(formData.farmSize) : undefined,
-        certifications: formData.certifications
-          ? formData.certifications.split(',').map((c) => c.trim()).filter(Boolean)
-          : [],
-        user: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone || undefined,
-          verified: formData.verified,
-        },
-      }
-
-      const res = await apiClient.post('/farmers', payload)
-      const created = res.data?.data || res.data
-      
-      // If user is an export company, automatically add farmer to supplier network
-      const userStr = localStorage.getItem('user')
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr)
-          if (user.role === 'EXPORT_COMPANY' && created?.id) {
-            try {
-              await apiClient.post('/supplier-networks', {
-                farmerId: created.id,
-                relationshipType: 'DIRECT',
-                notes: 'Added via farmer management',
-              })
-            } catch (networkError) {
-              // If network creation fails, log but don't fail the whole operation
-              console.warn('Failed to add farmer to supplier network:', networkError)
-            }
-          }
-        } catch (parseError) {
-          console.warn('Failed to parse user from localStorage:', parseError)
-        }
-      }
-      
-      setFarmers((prev) => [created, ...prev])
-      toast({
-        variant: 'success',
-        title: 'Farmer Added',
-        description: userStr && JSON.parse(userStr).role === 'EXPORT_COMPANY'
-          ? 'Farmer created and added to your supplier network'
-          : 'Farmer created successfully',
-      })
-      setShowForm(false)
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        businessName: '',
-        location: '',
-        region: '',
-        district: '',
-        farmSize: '',
-        certifications: '',
-        verified: false,
-        images: [],
-      })
-      setImageFiles([])
-    } catch (err: any) {
-      setFormError(err?.response?.data?.message || 'Failed to create farmer. Please check required fields.')
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: err?.response?.data?.message || 'Failed to create farmer',
-      })
-    } finally {
-      setSubmitting(false)
-    }
+    setPagination((prev) => ({ ...prev, page: 1 }))
+    fetchFarmers()
   }
 
-  if (loading) {
+  if (loading && farmers.length === 0) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-6">
         <Skeleton className="h-12 w-64" />
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-5/6" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-64" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 text-slate-100">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Farmers</h1>
-          <p className="text-gray-300 mt-1">Manage farmer profiles and listings</p>
+          <h1 className="text-3xl font-bold text-foreground">Discover Suppliers</h1>
+          <p className="text-muted-foreground mt-1">
+            Connect with verified farmers and producers across Ghana
+          </p>
         </div>
-        <Button className="shadow-glow" onClick={() => setShowForm((v) => !v)}>
-          {showForm ? <X className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-          {showForm ? 'Close' : 'Add Farmer'}
-        </Button>
       </div>
 
-      {showForm && (
-        <Card className="bg-slate-900/80 border-white/10 text-slate-100">
-          <CardContent className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold">New Farmer</h2>
-            {formError && (
-              <div className="rounded-md border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-                {formError}
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Suppliers</CardTitle>
+            <Users className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">
+              {statsLoading ? '...' : stats.total}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Registered farmers</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Verified</CardTitle>
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">
+              {statsLoading ? '...' : stats.verified}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Ghana Single Window verified</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">With Active Listings</CardTitle>
+            <Package className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">
+              {statsLoading ? '...' : stats.withListings}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Currently selling</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search and Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <form onSubmit={handleSearch} className="space-y-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, business, location, or crop type..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-            )}
-            <form className="space-y-4" onSubmit={handleAddFarmer}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone (optional)</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="businessName">Business Name (optional)</Label>
-                  <Input
-                    id="businessName"
-                    value={formData.businessName}
-                    onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="region">Region</Label>
-                  <Input
-                    id="region"
-                    value={formData.region}
-                    onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="district">District</Label>
-                  <Input
-                    id="district"
-                    value={formData.district}
-                    onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="farmSize">Farm Size (acres)</Label>
-                  <Input
-                    id="farmSize"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={formData.farmSize}
-                    onChange={(e) => setFormData({ ...formData, farmSize: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="certifications">Certifications (comma separated)</Label>
-                  <Input
-                    id="certifications"
-                    placeholder="Organic, Fair Trade"
-                    value={formData.certifications}
-                    onChange={(e) => setFormData({ ...formData, certifications: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="verified">Verified</Label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="verified"
-                      type="checkbox"
-                      checked={formData.verified}
-                      onChange={(e) => setFormData({ ...formData, verified: e.target.checked })}
-                      className="h-4 w-4 accent-primary"
-                    />
-                    <span className="text-sm text-gray-300">Mark as verified</span>
-                  </div>
-                </div>
-              </div>
+              <Button type="submit">Search</Button>
+            </div>
+            <FilterBar
+              filters={[
+                {
+                  id: 'region',
+                  label: 'Region',
+                  options: regionOptions,
+                  active: regionFilter,
+                  onChange: (val) => {
+                    setRegionFilter(val || null)
+                    setPagination((prev) => ({ ...prev, page: 1 }))
+                  },
+                },
+                {
+                  id: 'verified',
+                  label: 'Verification',
+                  options: verifiedOptions,
+                  active: verifiedFilter,
+                  onChange: (val) => {
+                    setVerifiedFilter(val || null)
+                    setPagination((prev) => ({ ...prev, page: 1 }))
+                  },
+                },
+              ]}
+              onClearAll={() => {
+                setRegionFilter(null)
+                setVerifiedFilter(null)
+                setSearch('')
+                setPagination((prev) => ({ ...prev, page: 1 }))
+              }}
+            />
+          </form>
+        </CardContent>
+      </Card>
 
-              {/* Image Upload Section */}
-              <div className="space-y-3">
-                <Label>Farm Images (Optional)</Label>
-                <div className="flex items-center gap-3">
-                  <label className="flex-1">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={async (e) => {
-                        const files = Array.from(e.target.files || [])
-                        if (files.length > 5) {
-                          toast({
-                            variant: 'destructive',
-                            title: 'Too Many Images',
-                            description: 'Please select up to 5 images only.',
-                          })
-                          return
-                        }
-
-                        setUploadingImages(true)
-                        try {
-                          const imagePromises = files.map((file) => {
-                            return new Promise<string>((resolve) => {
-                              const reader = new FileReader()
-                              reader.onloadend = () => {
-                                resolve(reader.result as string)
-                              }
-                              reader.readAsDataURL(file)
-                            })
-                          })
-
-                          const imageUrls = await Promise.all(imagePromises)
-                          setImageFiles(files)
-                          setFormData({
-                            ...formData,
-                            images: [...formData.images, ...imageUrls].slice(0, 5),
-                          })
-                        } catch (error) {
-                          toast({
-                            variant: 'destructive',
-                            title: 'Upload Failed',
-                            description: 'Failed to process images. Please try again.',
-                          })
-                        } finally {
-                          setUploadingImages(false)
-                        }
-                      }}
-                      className="bg-slate-800 border-slate-700 text-slate-100 cursor-pointer"
-                      disabled={uploadingImages || formData.images.length >= 5}
-                    />
-                  </label>
-                </div>
-
-                {/* Image Preview Grid */}
-                {formData.images.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                    {formData.images.map((imageUrl, index) => (
-                      <div key={index} className="relative group">
-                        <div className="relative aspect-square rounded-lg overflow-hidden border border-slate-700 bg-slate-800">
-                          <img
-                            src={imageUrl}
-                            alt={`Farm image ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newImages = formData.images.filter((_, i) => i !== index)
-                              setFormData({ ...formData, images: newImages })
-                              setImageFiles(imageFiles.filter((_, i) => i !== index))
-                            }}
-                            className="absolute top-1 right-1 p-1 bg-red-600/90 hover:bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            aria-label={`Remove image ${index + 1}`}
-                          >
-                            <X className="h-3 w-3 text-white" />
-                          </button>
-                        </div>
+      {/* Farmers Grid */}
+      {farmers.length > 0 ? (
+        <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {farmers.map((farmer) => (
+              <Link key={farmer.id} href={`/dashboard/farmers/${farmer.id}`}>
+                <Card className="hover:shadow-glow transition-all cursor-pointer h-full flex flex-col">
+                  <CardContent className="p-6 flex flex-col flex-1">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg text-foreground truncate">
+                          {farmer.businessName || `${farmer.user?.firstName} ${farmer.user?.lastName}`}
+                        </h3>
+                        {farmer.businessName && (
+                          <p className="text-sm text-muted-foreground truncate">
+                            {farmer.user?.firstName} {farmer.user?.lastName}
+                          </p>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
+                      {farmer.user?.verified && (
+                        <Badge variant="success" className="ml-2 flex-shrink-0">
+                          <ShieldCheck className="h-3 w-3 mr-1" />
+                          Verified
+                        </Badge>
+                      )}
+                    </div>
 
-                {formData.images.length === 0 && (
-                  <div className="border-2 border-dashed border-slate-700 rounded-lg p-6 text-center">
-                    <ImageIcon className="h-8 w-8 mx-auto text-gray-500 mb-2" />
-                    <p className="text-sm text-gray-400">
-                      No images yet. Upload photos of your farm to showcase your operation.
-                    </p>
-                  </div>
-                )}
+                    <div className="space-y-3 flex-1">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">
+                          {farmer.district && farmer.region
+                            ? `${farmer.district}, ${farmer.region}`
+                            : farmer.location || 'Location not specified'}
+                        </span>
+                      </div>
+
+                      {farmer.farmSize && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Farm Size: </span>
+                          <span className="font-medium text-foreground">{farmer.farmSize} acres</span>
+                        </div>
+                      )}
+
+                      {farmer.listings && farmer.listings.length > 0 && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Package className="h-4 w-4 text-primary" />
+                          <span className="text-foreground">
+                            <span className="font-semibold">{farmer.listings.length}</span>{' '}
+                            {farmer.listings.length === 1 ? 'active listing' : 'active listings'}
+                          </span>
+                        </div>
+                      )}
+
+                      {farmer.certifications && farmer.certifications.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {farmer.certifications.slice(0, 3).map((cert, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {cert}
+                            </Badge>
+                          ))}
+                          {farmer.certifications.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{farmer.certifications.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <Button variant="outline" className="w-full" size="sm">
+                        View Profile
+                        <ChevronRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t border-border">
+              <div className="text-sm text-muted-foreground">
+                Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+                {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} suppliers
               </div>
-              <div className="flex items-center gap-3">
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? 'Adding...' : 'Add Farmer'}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+                  disabled={pagination.page === 1 || loading}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
                 </Button>
-                <Button variant="ghost" type="button" onClick={() => setShowForm(false)}>
-                  Cancel
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    let pageNum: number
+                    if (pagination.totalPages <= 5) {
+                      pageNum = i + 1
+                    } else if (pagination.page <= 3) {
+                      pageNum = i + 1
+                    } else if (pagination.page >= pagination.totalPages - 2) {
+                      pageNum = pagination.totalPages - 4 + i
+                    } else {
+                      pageNum = pagination.page - 2 + i
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={pagination.page === pageNum ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setPagination({ ...pagination, page: pageNum })}
+                        disabled={loading}
+                        className="min-w-[40px]"
+                      >
+                        {pageNum}
+                      </Button>
+                    )
+                  })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+                  disabled={pagination.page === pagination.totalPages || loading}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-            </form>
+            </div>
+          )}
+        </>
+      ) : (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-50" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">No Suppliers Found</h3>
+            <p className="text-muted-foreground mb-6">
+              {search || regionFilter || verifiedFilter
+                ? 'Try adjusting your search or filters to find more suppliers.'
+                : 'No suppliers are currently registered. Check back later.'}
+            </p>
+            {(search || regionFilter || verifiedFilter) && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearch('')
+                  setRegionFilter(null)
+                  setVerifiedFilter(null)
+                  setPagination((prev) => ({ ...prev, page: 1 }))
+                }}
+              >
+                Clear Filters
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
 
-      <FilterBar
-        searchPlaceholder="Search farmers..."
-        searchValue={search}
-        onSearchChange={setSearch}
-        filters={[
-          {
-            id: 'region',
-            label: 'Region',
-            options: regionOptions,
-            active: regionFilter,
-            onChange: (val) => setRegionFilter(val),
-          },
-          {
-            id: 'verified',
-            label: 'Verification',
-            options: verifiedOptions,
-            active: verifiedFilter,
-            onChange: (val) => setVerifiedFilter(val),
-          },
-        ]}
-        onClearAll={() => {
-          setRegionFilter(null)
-          setVerifiedFilter(null)
-        }}
-      />
-
-      {/* Farmers Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredFarmers.map((farmer) => (
-          <Link key={farmer.id} href={`/dashboard/farmers/${farmer.id}`}>
-            <Card className="hover:shadow-glow transition-shadow cursor-pointer bg-slate-900 border-white/10">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-lg text-white">
-                      {farmer.businessName || `${farmer.user?.firstName} ${farmer.user?.lastName}`}
-                    </h3>
-                    <p className="text-sm text-gray-300">{farmer.location}</p>
-                  </div>
-                  {farmer.user?.verified && <Badge variant="success">Verified</Badge>}
-                </div>
-                <div className="space-y-2 text-sm text-gray-200">
-                  <p>
-                    <span className="font-medium text-white">Region:</span> {farmer.region}
-                  </p>
-                  <p>
-                    <span className="font-medium text-white">District:</span> {farmer.district}
-                  </p>
-                  {farmer.farmSize && (
-                    <p>
-                      <span className="font-medium text-white">Farm Size:</span> {farmer.farmSize} acres
-                    </p>
-                  )}
-                  {farmer.certifications.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {farmer.certifications.slice(0, 2).map((cert, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {cert}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-
-      {filteredFarmers.length === 0 && !loading && (
-        <div className="text-center py-12 text-gray-400">
-          No farmers found. Try adjusting your search or filters.
-        </div>
-      )}
-
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-          <div className="text-sm text-gray-400">
-            Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
-            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} farmers
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
-              disabled={pagination.page === 1 || loading}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                let pageNum: number
-                if (pagination.totalPages <= 5) {
-                  pageNum = i + 1
-                } else if (pagination.page <= 3) {
-                  pageNum = i + 1
-                } else if (pagination.page >= pagination.totalPages - 2) {
-                  pageNum = pagination.totalPages - 4 + i
-                } else {
-                  pageNum = pagination.page - 2 + i
-                }
-                return (
-                  <Button
-                    key={pageNum}
-                    variant={pagination.page === pageNum ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setPagination({ ...pagination, page: pageNum })}
-                    disabled={loading}
-                    className="min-w-[40px]"
-                  >
-                    {pageNum}
-                  </Button>
-                )
-              })}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
-              disabled={pagination.page === pagination.totalPages || loading}
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+      {/* Add Supplier Dialog */}
+      {selectedFarmer && (
+        <AddSupplierDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          farmer={selectedFarmer}
+          onSuccess={handleAddSuccess}
+        />
       )}
     </div>
   )
 }
-

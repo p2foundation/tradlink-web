@@ -18,6 +18,9 @@ import {
   ArrowLeft,
   FileText,
   DollarSign,
+  Package,
+  Truck,
+  MapPin,
 } from 'lucide-react'
 import apiClient from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
@@ -230,7 +233,7 @@ export default function PaymentPage() {
   if (!transaction) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-400">Transaction not found</p>
+        <p className="text-muted-foreground">Transaction not found</p>
       </div>
     )
   }
@@ -247,12 +250,11 @@ export default function PaymentPage() {
   const isPending = payment?.paymentStatus === 'PENDING' || payment?.paymentStatus === 'PROCESSING'
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="text-slate-300"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
@@ -261,14 +263,14 @@ export default function PaymentPage() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
             Payment
           </h1>
-          <p className="text-gray-400 mt-1">Complete your transaction payment</p>
+          <p className="text-muted-foreground mt-1">Complete your transaction payment</p>
         </div>
       </div>
 
       {/* Transaction Summary */}
-      <Card className="bg-slate-900 border-white/10">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
             Transaction Summary
           </CardTitle>
@@ -276,23 +278,23 @@ export default function PaymentPage() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-gray-400">Amount</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-sm text-muted-foreground">Amount</p>
+              <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(transaction.totalValue, transaction.currency)}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-400">Quantity</p>
-              <p className="text-lg font-semibold text-white">{transaction.quantity} tons</p>
+              <p className="text-sm text-muted-foreground">Quantity</p>
+              <p className="text-lg font-semibold text-foreground">{transaction.quantity} tons</p>
             </div>
             <div>
-              <p className="text-sm text-gray-400">Price per Unit</p>
-              <p className="text-lg font-semibold text-white">
+              <p className="text-sm text-muted-foreground">Price per Unit</p>
+              <p className="text-lg font-semibold text-foreground">
                 {formatCurrency(transaction.agreedPrice, transaction.currency)}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-400">Status</p>
+              <p className="text-sm text-muted-foreground">Status</p>
               {isPaid ? (
                 <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -315,26 +317,121 @@ export default function PaymentPage() {
       </Card>
 
       {isPaid ? (
-        <Card className="bg-emerald-900/20 border-emerald-500/30">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <CheckCircle2 className="h-16 w-16 text-emerald-400 mx-auto" />
-              <div>
-                <h3 className="text-xl font-semibold text-emerald-300 mb-2">
-                  Payment Completed!
-                </h3>
-                <p className="text-emerald-200/70">
-                  Your payment has been successfully processed
-                </p>
-                {payment?.receiptNumber && (
-                  <p className="text-sm text-emerald-200/50 mt-2">
-                    Receipt Number: {payment.receiptNumber}
+        <>
+          <Card className="bg-emerald-500/10 border-emerald-500/30">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto" />
+                <div>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    Payment Completed!
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Your payment has been successfully processed
                   </p>
-                )}
+                  {payment?.receiptNumber && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Receipt Number: {payment.receiptNumber}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          {/* What Happens Next */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                What Happens Next?
+              </CardTitle>
+              <CardDescription>
+                Your order is now being processed
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-emerald-500/10 rounded-lg">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-foreground mb-1">Payment Confirmed</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Your payment has been received and verified. The transaction status has been updated to "Paid".
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-blue-500/10 rounded-lg">
+                    <Package className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-foreground mb-1">Farmer Notification</h4>
+                    <p className="text-sm text-muted-foreground">
+                      The farmer/supplier has been notified of your payment. They will now prepare the shipment.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-amber-500/10 rounded-lg">
+                    <FileText className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-foreground mb-1">Documentation & Processing</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Export documents (Certificate of Origin, Phytosanitary Certificate, Commercial Invoice) will be prepared and processed through Ghana Single Window.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-purple-500/10 rounded-lg">
+                    <Truck className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-foreground mb-1">Shipment Preparation</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Once documentation is complete, the shipment will be prepared and dispatched from the port. You'll receive tracking information.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-green-500/10 rounded-lg">
+                    <MapPin className="h-5 w-5 text-green-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-foreground mb-1">Delivery</h4>
+                    <p className="text-sm text-muted-foreground">
+                      The shipment will be delivered to your specified destination. You can track the progress in real-time.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-1">Track Your Order</p>
+                    <p className="text-xs text-muted-foreground">
+                      Monitor shipment status and receive real-time updates
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => router.push(`/dashboard/transactions/${transactionId}`)}
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    View Transaction Details
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </>
       ) : isPending && payment?.isManual ? (
         <Card className="bg-amber-900/20 border-amber-500/30">
           <CardContent className="pt-6">
@@ -359,10 +456,10 @@ export default function PaymentPage() {
       ) : (
         <>
           {/* Payment Methods */}
-          <Card className="bg-slate-900 border-white/10">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-white">Select Payment Method</CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardTitle>Select Payment Method</CardTitle>
+              <CardDescription>
                 Choose how you want to pay for this transaction
               </CardDescription>
             </CardHeader>
@@ -378,12 +475,12 @@ export default function PaymentPage() {
                       className={`p-4 rounded-lg border-2 transition-all text-left ${
                         isSelected
                           ? 'border-emerald-500 bg-emerald-500/10'
-                          : 'border-slate-700 bg-slate-800 hover:border-slate-600'
+                          : 'border-border bg-card hover:bg-accent'
                       }`}
                     >
-                      <Icon className="h-6 w-6 text-slate-300 mb-2" />
-                      <p className="font-semibold text-slate-100">{method.label}</p>
-                      <p className="text-xs text-slate-400 mt-1">{method.description}</p>
+                      <Icon className="h-6 w-6 text-foreground mb-2" />
+                      <p className="font-semibold text-foreground">{method.label}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{method.description}</p>
                     </button>
                   )
                 })}
@@ -393,9 +490,9 @@ export default function PaymentPage() {
 
           {/* Payment Forms */}
           {selectedMethod && (
-            <Card className="bg-slate-900 border-white/10">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">
+                <CardTitle>
                   {selectedMethod === 'MANUAL_PORT' ? 'Upload Payment Receipt' : 'Payment Details'}
                 </CardTitle>
               </CardHeader>
@@ -403,46 +500,43 @@ export default function PaymentPage() {
                 {selectedMethod === 'VISA' || selectedMethod === 'MASTERCARD' ? (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="cardName" className="text-slate-200">
+                      <Label htmlFor="cardName">
                         Cardholder Name
                       </Label>
                       <Input
                         id="cardName"
                         value={cardName}
                         onChange={(e) => setCardName(e.target.value)}
-                        className="bg-slate-800 border-slate-700 text-slate-100"
                         placeholder="John Doe"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cardNumber" className="text-slate-200">
+                      <Label htmlFor="cardNumber">
                         Card Number
                       </Label>
                       <Input
                         id="cardNumber"
                         value={cardNumber}
                         onChange={(e) => setCardNumber(e.target.value.replace(/\s/g, ''))}
-                        className="bg-slate-800 border-slate-700 text-slate-100"
                         placeholder="1234 5678 9012 3456"
                         maxLength={19}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="cardExpiry" className="text-slate-200">
+                        <Label htmlFor="cardExpiry">
                           Expiry Date
                         </Label>
                         <Input
                           id="cardExpiry"
                           value={cardExpiry}
                           onChange={(e) => setCardExpiry(e.target.value)}
-                          className="bg-slate-800 border-slate-700 text-slate-100"
                           placeholder="MM/YY"
                           maxLength={5}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="cardCVC" className="text-slate-200">
+                        <Label htmlFor="cardCVC">
                           CVC
                         </Label>
                         <Input
@@ -450,7 +544,6 @@ export default function PaymentPage() {
                           type="password"
                           value={cardCVC}
                           onChange={(e) => setCardCVC(e.target.value)}
-                          className="bg-slate-800 border-slate-700 text-slate-100"
                           placeholder="123"
                           maxLength={4}
                         />
@@ -467,14 +560,14 @@ export default function PaymentPage() {
                 ) : selectedMethod === 'MOBILE_MONEY' ? (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="mobileNetwork" className="text-slate-200">
+                      <Label htmlFor="mobileNetwork">
                         Network
                       </Label>
                       <select
                         id="mobileNetwork"
                         value={mobileNetwork}
                         onChange={(e) => setMobileNetwork(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-100"
+                        className="w-full px-3 py-2 rounded-lg"
                       >
                         <option value="MTN">MTN Mobile Money</option>
                         <option value="VODAFONE">Vodafone Cash</option>
@@ -482,14 +575,14 @@ export default function PaymentPage() {
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="mobileNumber" className="text-slate-200">
+                      <Label htmlFor="mobileNumber">
                         Mobile Money Number
                       </Label>
                       <Input
                         id="mobileNumber"
                         value={mobileNumber}
                         onChange={(e) => setMobileNumber(e.target.value)}
-                        className="bg-slate-800 border-slate-700 text-slate-100"
+                        className=""
                         placeholder="0244 123 456"
                       />
                     </div>
@@ -519,15 +612,15 @@ export default function PaymentPage() {
                   </>
                 ) : selectedMethod === 'MANUAL_PORT' ? (
                   <>
-                    <div className="p-4 bg-amber-900/20 border border-amber-800/50 rounded-lg mb-4">
-                      <p className="text-sm text-amber-300">
+                    <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg mb-4">
+                      <p className="text-sm text-amber-600 dark:text-amber-300">
                         For Ghana Port manual payments, please upload your payment receipt/chit issued by the port.
                         Your payment will be verified by our team before completion.
                       </p>
                     </div>
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="receiptFile" className="text-slate-200">
+                        <Label htmlFor="receiptFile">
                           Upload Receipt/Chit
                         </Label>
                         <div className="flex items-center gap-4">
@@ -536,7 +629,7 @@ export default function PaymentPage() {
                             type="file"
                             accept="image/*,.pdf"
                             onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-                            className="bg-slate-800 border-slate-700 text-slate-100"
+                            className=""
                           />
                           {receiptFile && (
                             <Badge className="bg-emerald-500/20 text-emerald-400">
@@ -547,19 +640,19 @@ export default function PaymentPage() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="receiptNumber" className="text-slate-200">
+                        <Label htmlFor="receiptNumber">
                           Receipt Number
                         </Label>
                         <Input
                           id="receiptNumber"
                           value={receiptNumber}
                           onChange={(e) => setReceiptNumber(e.target.value)}
-                          className="bg-slate-800 border-slate-700 text-slate-100"
+                          className=""
                           placeholder="Enter receipt number from port"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="receiptDate" className="text-slate-200">
+                        <Label htmlFor="receiptDate">
                           Receipt Date
                         </Label>
                         <Input
@@ -567,7 +660,7 @@ export default function PaymentPage() {
                           type="date"
                           value={receiptDate}
                           onChange={(e) => setReceiptDate(e.target.value)}
-                          className="bg-slate-800 border-slate-700 text-slate-100"
+                          className=""
                         />
                       </div>
                       <Button
@@ -577,7 +670,7 @@ export default function PaymentPage() {
                       >
                         {uploading ? (
                           <span className="flex items-center gap-2">
-                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                             Uploading...
                           </span>
                         ) : (

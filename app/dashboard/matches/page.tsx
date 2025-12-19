@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import apiClient from '@/lib/api-client'
-import { Match, MatchStatus } from '@/types'
+import { Match, MatchStatus, UserRole } from '@/types'
 import { MatchCard } from '@/components/matches/match-card'
 import { FilterBar, FilterOption } from '@/components/ui/filter-bar'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -15,6 +15,7 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
+  const [user, setUser] = useState<any>(null)
   const [statusFilter, setStatusFilter] = useState<MatchStatus | 'ALL'>('ALL')
   const [search, setSearch] = useState('')
   const [pagination, setPagination] = useState({
@@ -23,6 +24,17 @@ export default function MatchesPage() {
     total: 0,
     totalPages: 0,
   })
+
+  useEffect(() => {
+    // Load current user to determine role
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
+    } else {
+      // Fallback: fetch from API
+      apiClient.get('/auth/me').then(res => setUser(res.data)).catch(console.error)
+    }
+  }, [])
 
   useEffect(() => {
     // Reset to page 1 when filters change
@@ -61,48 +73,76 @@ export default function MatchesPage() {
   const handleSuggestMatches = async () => {
     try {
       setGenerating(true)
-      // Fetch all buyers first
-      const buyersResponse = await apiClient.get('/buyers?limit=100')
-      const buyers = buyersResponse.data.data || []
-      
-      if (buyers.length === 0) {
-        alert('No buyers found. Please add buyers first.')
-        setGenerating(false)
-        return
-      }
+      const userRole = user?.role
 
-      // Generate suggestions for all buyers
-      let totalGenerated = 0
-      for (const buyer of buyers) {
-        try {
-          const response = await apiClient.post(`/matches/suggest?buyerId=${buyer.id}&limit=10`)
-          if (Array.isArray(response.data)) {
-            totalGenerated += response.data.length
-          }
-        } catch (err) {
-          console.error(`Failed to generate suggestions for buyer ${buyer.id}:`, err)
+      // Role-specific match generation
+      if (userRole === UserRole.FARMER || userRole === UserRole.TRADER || userRole === UserRole.EXPORT_COMPANY) {
+        // For farmers/traders/export companies: find buyers for their listings
+        // Fetch all buyers first
+        const buyersResponse = await apiClient.get('/buyers?limit=100')
+        const buyers = buyersResponse.data.data || []
+        
+        if (buyers.length === 0) {
+          toast({
+            variant: 'warning',
+            title: 'No Buyers Found',
+            description: 'No buyers available for matching. Please try again later.',
+          })
+          setGenerating(false)
+          return
         }
-      }
 
-      // Refresh the matches list to show new suggestions
-      await fetchMatches()
-      
-      if (totalGenerated > 0) {
+        // Generate suggestions for all buyers
+        let totalGenerated = 0
+        for (const buyer of buyers) {
+          try {
+            const response = await apiClient.post(`/matches/suggest?buyerId=${buyer.id}&limit=10`)
+            if (Array.isArray(response.data)) {
+              totalGenerated += response.data.length
+            }
+          } catch (err) {
+            console.error(`Failed to generate suggestions for buyer ${buyer.id}:`, err)
+          }
+        }
+
+        // Refresh the matches list to show new suggestions
+        await fetchMatches()
+        
+        if (totalGenerated > 0) {
+          toast({
+            variant: 'success',
+            title: 'AI Suggestions Generated',
+            description: `Generated ${totalGenerated} new match suggestions with buyers`,
+          })
+        } else {
+          toast({
+            variant: 'warning',
+            title: 'No New Matches',
+            description: 'No new matches were generated. Try again later.',
+          })
+        }
+      } else if (userRole === UserRole.BUYER) {
+        // For buyers: find suppliers/farmers for their requirements
+        // This would need a different endpoint or logic
         toast({
-          variant: 'success',
-          title: 'AI Suggestions Generated',
-          description: `Generated ${totalGenerated} new match suggestions`,
+          variant: 'info',
+          title: 'Feature Coming Soon',
+          description: 'Buyer match suggestions will be available soon.',
         })
       } else {
         toast({
           variant: 'warning',
-          title: 'No New Matches',
-          description: 'No new matches were generated. Try again later.',
+          title: 'Not Available',
+          description: 'Match suggestions are only available for farmers, traders, and buyers.',
         })
       }
     } catch (error) {
       console.error('Failed to generate suggestions:', error)
-      alert('Failed to generate AI suggestions. Please try again.')
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to generate AI suggestions. Please try again.',
+      })
     } finally {
       setGenerating(false)
     }
@@ -147,11 +187,11 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Buyer-Seller Matches</h1>
-          <p className="text-gray-300 mt-1">AI-powered matching and deal pipeline</p>
+          <h1 className="text-3xl font-bold text-foreground">Buyer-Seller Matches</h1>
+          <p className="text-muted-foreground mt-1">AI-powered matching and deal pipeline</p>
         </div>
         <Button 
           onClick={handleSuggestMatches} 
@@ -188,12 +228,28 @@ export default function MatchesPage() {
           } catch {
             reasons = []
           }
+
+          // Determine display names based on user role
+          const userRole = user?.role
+          let farmerName = `${match.farmer?.user?.firstName ?? ''} ${match.farmer?.user?.lastName ?? ''}`.trim() || match.farmer?.businessName || 'Farmer'
+          let buyerName = `${match.buyer?.user?.firstName ?? ''} ${match.buyer?.user?.lastName ?? ''}`.trim() || match.buyer?.companyName || 'Buyer'
+
+          // For farmers/traders: show buyer info prominently
+          // For buyers: show farmer/supplier info prominently
+          if (userRole === UserRole.BUYER) {
+            // Buyer sees: Supplier/Farmer ↔ Buyer (themselves)
+            // Show supplier name first
+            const temp = farmerName
+            farmerName = buyerName
+            buyerName = temp
+          }
+
           return (
             <MatchCard
               key={match.id}
               id={match.id}
-              farmerName={`${match.farmer?.user?.firstName ?? ''} ${match.farmer?.user?.lastName ?? ''}`.trim()}
-              buyerName={`${match.buyer?.user?.firstName ?? ''} ${match.buyer?.user?.lastName ?? ''}`.trim()}
+              farmerName={farmerName}
+              buyerName={buyerName}
               crop={match.listing?.cropType ?? '—'}
               quantity={
                 match.listing
@@ -204,21 +260,33 @@ export default function MatchesPage() {
               estimatedValue={match.estimatedValue}
               status={match.status}
               reasons={reasons}
+              listing={match.listing ? {
+                id: match.listing.id,
+                pricePerUnit: match.listing.pricePerUnit,
+                quantity: match.listing.quantity,
+                unit: match.listing.unit,
+              } : null}
               onUpdateStatus={(id, status) => updateMatchStatus(id, status)}
+              userRole={userRole}
             />
           )
         })}
       </div>
 
       {filteredMatches.length === 0 && !loading && (
-        <div className="text-center py-12 text-gray-400">
-          No matches found. Generate AI suggestions to find potential deals.
+        <div className="text-center py-12 text-muted-foreground">
+          {user?.role === UserRole.BUYER 
+            ? 'No supplier matches found. Generate AI suggestions to discover verified farmers and suppliers.'
+            : user?.role === UserRole.FARMER || user?.role === UserRole.TRADER || user?.role === UserRole.EXPORT_COMPANY
+            ? 'No buyer matches found. Generate AI suggestions to find potential international buyers.'
+            : 'No matches found. Generate AI suggestions to find potential deals.'
+          }
         </div>
       )}
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
           <div className="text-sm text-gray-400">
             Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
             {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} matches

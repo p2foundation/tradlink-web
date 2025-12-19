@@ -39,27 +39,27 @@ export function FilterBar({
   return (
     <div
       className={cn(
-        'w-full rounded-xl border border-white/10 bg-slate-900/80 backdrop-blur-lg shadow-sm text-slate-100',
+        'w-full rounded-xl border border-border bg-card/80 backdrop-blur-lg shadow-sm',
         dense ? 'p-3' : 'p-6',
       )}
     >
       <div className="flex flex-col gap-5">
         {/* Large, Prominent Search Input */}
         <div className="relative">
-          <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400 pointer-events-none z-10" />
+          <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-6 w-6 text-muted-foreground pointer-events-none z-10" />
           <Input
             type="search"
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-16 pl-16 pr-16 text-lg bg-slate-800 border-2 border-slate-700 text-slate-100 placeholder:text-gray-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/40 transition-all shadow-lg"
+            className="h-16 pl-16 pr-16 text-lg border-2 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/40 transition-all shadow-lg"
           />
           {searchValue && (
             <button
               type="button"
               aria-label="Clear search"
               onClick={() => onSearchChange('')}
-              className="absolute right-5 top-1/2 transform -translate-y-1/2 flex items-center justify-center w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 text-gray-400 hover:text-white transition-colors"
+              className="absolute right-5 top-1/2 transform -translate-y-1/2 flex items-center justify-center w-10 h-10 rounded-full bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -70,7 +70,7 @@ export function FilterBar({
         <div className="flex flex-wrap items-center gap-4">
           {filters.map((filter) => (
             <div key={filter.id} className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-300 uppercase tracking-wide whitespace-nowrap">
+              <span className="text-sm font-semibold text-foreground uppercase tracking-wide whitespace-nowrap">
                 {filter.label}:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -94,7 +94,7 @@ export function FilterBar({
             <Button
               variant="ghost"
               size="sm"
-              className="text-gray-300 hover:text-white ml-auto"
+              className="ml-auto"
               disabled={!hasActiveFilters && !searchValue}
               onClick={() => {
                 onSearchChange('')

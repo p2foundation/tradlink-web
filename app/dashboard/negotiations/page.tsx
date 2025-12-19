@@ -66,6 +66,13 @@ export default function NegotiationsPage() {
       setUser(JSON.parse(storedUser))
     }
     fetchNegotiations()
+    
+    // Poll for real-time updates every 15 seconds
+    const interval = setInterval(() => {
+      fetchNegotiations()
+    }, 15000) // 15 seconds
+
+    return () => clearInterval(interval)
   }, [pagination.page])
 
   const fetchNegotiations = async () => {
@@ -120,7 +127,7 @@ export default function NegotiationsPage() {
       case 'EXPIRED':
         return <AlertCircle className="h-4 w-4 text-yellow-500" />
       default:
-        return <MessageSquareText className="h-4 w-4 text-gray-500" />
+        return <MessageSquareText className="h-4 w-4 text-muted-foreground" />
     }
   }
 
@@ -135,20 +142,20 @@ export default function NegotiationsPage() {
   }
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Negotiations</h1>
-          <p className="text-gray-300 mt-1">Manage your active negotiations and offers</p>
+          <h1 className="text-3xl font-bold text-foreground">Negotiations</h1>
+          <p className="text-muted-foreground mt-1">Manage your active negotiations and offers</p>
         </div>
       </div>
 
       {negotiations.length === 0 ? (
-        <Card className="bg-slate-900 border-white/10">
+        <Card>
           <CardContent className="p-12 text-center">
-            <MessageSquareText className="h-16 w-16 mx-auto text-gray-500 mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No Negotiations Yet</h3>
-            <p className="text-gray-400 mb-6">
+            <MessageSquareText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">No Negotiations Yet</h3>
+            <p className="text-muted-foreground mb-6">
               Start a negotiation by placing an order from a listing or accepting a buyer match.
             </p>
             <div className="flex gap-3 justify-center">
@@ -166,7 +173,7 @@ export default function NegotiationsPage() {
           {negotiations.map((negotiation) => (
             <Card
               key={negotiation.id}
-              className="bg-slate-900 border-white/10 hover:shadow-glow transition-all cursor-pointer"
+              className="hover:shadow-glow transition-all cursor-pointer"
               onClick={() => router.push(`/dashboard/negotiations/${negotiation.matchId}`)}
             >
               <CardContent className="p-6">
@@ -177,11 +184,11 @@ export default function NegotiationsPage() {
                         {getStatusIcon(negotiation.status)}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg text-white">
+                        <h3 className="font-semibold text-lg text-foreground">
                           {negotiation.match?.listing?.cropType || 'Product'}
                           {negotiation.match?.listing?.cropVariety && ` - ${negotiation.match.listing.cropVariety}`}
                         </h3>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           {negotiation.match?.farmer?.user
                             ? `${negotiation.match.farmer.user.firstName} ${negotiation.match.farmer.user.lastName}`
                             : 'Farmer'}{' '}
@@ -195,26 +202,26 @@ export default function NegotiationsPage() {
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-400">Current Price</p>
-                        <p className="font-semibold text-white">
+                        <p className="text-muted-foreground">Current Price</p>
+                        <p className="font-semibold text-foreground">
                           {formatCurrency(negotiation.currentPrice)}/{negotiation.currency}
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-400">Quantity</p>
-                        <p className="font-semibold text-white">
+                        <p className="text-muted-foreground">Quantity</p>
+                        <p className="font-semibold text-foreground">
                           {negotiation.quantity.toLocaleString()} units
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-400">Total Value</p>
+                        <p className="text-muted-foreground">Total Value</p>
                         <p className="font-semibold text-emerald-400">
                           {formatCurrency(negotiation.currentPrice * negotiation.quantity)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-400">Last Updated</p>
-                        <p className="font-semibold text-white">{formatDate(negotiation.updatedAt)}</p>
+                        <p className="text-muted-foreground">Last Updated</p>
+                        <p className="font-semibold text-foreground">{formatDate(negotiation.updatedAt)}</p>
                       </div>
                     </div>
                   </div>
@@ -228,7 +235,6 @@ export default function NegotiationsPage() {
                         e.stopPropagation()
                         router.push(`/dashboard/negotiations/${negotiation.matchId}`)
                       }}
-                      className="bg-slate-800 border-slate-700 text-slate-100 hover:bg-slate-700"
                     >
                       View Details
                       <ArrowRight className="h-4 w-4 ml-2" />
@@ -243,8 +249,8 @@ export default function NegotiationsPage() {
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-          <div className="text-sm text-gray-400">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <div className="text-sm text-muted-foreground">
             Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
             {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} negotiations
           </div>

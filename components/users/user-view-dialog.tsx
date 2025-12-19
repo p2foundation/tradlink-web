@@ -29,15 +29,23 @@ export function UserViewDialog({ user, open, onOpenChange }: UserViewDialogProps
   if (!user) return null
 
   const getRoleBadge = (role: UserRole) => {
-    const colors = {
-      [UserRole.FARMER]: 'bg-green-500/10 text-green-300 border-green-500',
-      [UserRole.BUYER]: 'bg-blue-500/10 text-blue-300 border-blue-500',
-      [UserRole.EXPORT_COMPANY]: 'bg-purple-500/10 text-purple-300 border-purple-500',
-      [UserRole.ADMIN]: 'bg-red-500/10 text-red-300 border-red-500',
+    const colors: Record<UserRole, string> = {
+      [UserRole.FARMER]: 'bg-emerald-500/10 text-emerald-300 border-emerald-500',
+      [UserRole.BUYER]: 'bg-amber-500/10 text-amber-300 border-amber-500',
+      [UserRole.EXPORT_COMPANY]: 'bg-cyan-500/10 text-cyan-300 border-cyan-500',
+      [UserRole.TRADER]: 'bg-blue-500/10 text-blue-300 border-blue-500',
+      [UserRole.LOGISTICS_PROVIDER]: 'bg-indigo-500/10 text-indigo-300 border-indigo-500',
+      [UserRole.CUSTOMS_BROKER]: 'bg-purple-500/10 text-purple-300 border-purple-500',
+      [UserRole.QUALITY_ASSURANCE]: 'bg-green-500/10 text-green-300 border-green-500',
+      [UserRole.FINANCIAL_INSTITUTION]: 'bg-yellow-500/10 text-yellow-300 border-yellow-500',
+      [UserRole.AGRIBUSINESS]: 'bg-orange-500/10 text-orange-300 border-orange-500',
+      [UserRole.GOVERNMENT_OFFICIAL]: 'bg-red-500/10 text-red-300 border-red-500',
+      [UserRole.ADMIN]: 'bg-gray-500/10 text-gray-300 border-gray-500',
     }
+    const defaultColor = 'bg-slate-500/10 text-slate-300 border-slate-500'
     return (
-      <Badge variant="outline" className={colors[role]}>
-        {role.replace('_', ' ')}
+      <Badge variant="outline" className={colors[role] || defaultColor}>
+        {role.replace(/_/g, ' ')}
       </Badge>
     )
   }

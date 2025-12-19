@@ -212,51 +212,53 @@ export function AdminDashboard({ user }: { user: any }) {
 
       {/* Key Metrics */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
             <Users className="h-4 w-4 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.totalUsers.toLocaleString()}</div>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.totalUsers.toLocaleString()}</div>
             <div className="flex items-center gap-2 mt-1">
-              <p className="text-xs text-gray-400">Farmers: {stats.totalFarmers}</p>
-              <p className="text-xs text-gray-400">•</p>
-              <p className="text-xs text-gray-400">Buyers: {stats.totalBuyers}</p>
+              <p className="text-xs text-muted-foreground">Farmers: {stats.totalFarmers}</p>
+              <p className="text-xs text-muted-foreground">•</p>
+              <p className="text-xs text-muted-foreground">Buyers: {stats.totalBuyers}</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Platform Trade Value</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Platform Trade Value</CardTitle>
             <BarChart3 className="h-4 w-4 text-blue-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{formatCurrency(stats.platformTradeValue)}</div>
-            <p className="text-xs text-gray-400 mt-1">This month • {currency.code}</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate" title={formatCurrency(stats.platformTradeValue)}>
+              {formatCurrency(stats.platformTradeValue)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">This month • {currency.code}</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">System Uptime</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">System Uptime</CardTitle>
             <Activity className="h-4 w-4 text-green-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.systemUptime}%</div>
-            <p className="text-xs text-gray-400 mt-1">Last 30 days</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.systemUptime}%</div>
+            <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Active Shipments</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Shipments</CardTitle>
             <Truck className="h-4 w-4 text-blue-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.activeShipments}</div>
-            <p className="text-xs text-gray-400 mt-1">
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.activeShipments}</div>
+            <p className="text-xs text-muted-foreground mt-1">
               {stats.deliveredShipments} delivered • {stats.totalShipments} total
             </p>
           </CardContent>
@@ -403,12 +405,12 @@ export function AdminDashboard({ user }: { user: any }) {
       </div>
 
       {/* Platform Shipment Tracking */}
-      <Card className="bg-slate-900 border-white/10">
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-white">Platform Shipment Tracking</CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardTitle>Platform Shipment Tracking</CardTitle>
+              <CardDescription>
                 Monitor all active shipments across the platform • {stats.activeShipments} active, {stats.deliveredShipments} delivered
               </CardDescription>
             </div>
@@ -426,7 +428,7 @@ export function AdminDashboard({ user }: { user: any }) {
                 <ShipmentCard key={shipment.id} {...shipment} />
               ))
             ) : (
-              <div className="text-center py-8 text-gray-400">
+              <div className="text-center py-8 text-muted-foreground">
                 <Truck className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No active shipments to display</p>
               </div>

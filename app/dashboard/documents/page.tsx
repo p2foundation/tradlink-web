@@ -41,7 +41,7 @@ export default function DocumentsPage() {
         <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
           Documents
         </h1>
-        <p className="text-gray-300 mt-1">
+        <p className="text-muted-foreground mt-1">
           Manage your trade certificates, licenses, and contracts
         </p>
       </div>
@@ -57,12 +57,12 @@ export default function DocumentsPage() {
           </>
         ) : (
           <>
-            <Card className="shadow-lg bg-slate-900 border-white/10">
+            <Card className="shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-300">Total Documents</p>
-                    <p className="text-2xl font-bold mt-1 text-white">{stats.total}</p>
+                    <p className="text-sm text-muted-foreground">Total Documents</p>
+                    <p className="text-2xl font-bold mt-1 text-foreground">{stats.total}</p>
                   </div>
                   <div className="p-3 bg-blue-500/10 rounded-lg">
                     <FileText className="h-6 w-6 text-blue-500" />
@@ -71,12 +71,12 @@ export default function DocumentsPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg bg-slate-900 border-white/10">
+            <Card className="shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-300">Verified</p>
-                    <p className="text-2xl font-bold mt-1 text-emerald-400">{stats.verified}</p>
+                    <p className="text-sm text-muted-foreground">Verified</p>
+                    <p className="text-2xl font-bold mt-1 text-emerald-500">{stats.verified}</p>
                   </div>
                   <div className="p-3 bg-emerald-500/10 rounded-lg">
                     <CheckCircle2 className="h-6 w-6 text-emerald-500" />
@@ -85,12 +85,12 @@ export default function DocumentsPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg bg-slate-900 border-white/10">
+            <Card className="shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-300">Pending</p>
-                    <p className="text-2xl font-bold mt-1 text-yellow-400">{stats.pending}</p>
+                    <p className="text-sm text-muted-foreground">Pending</p>
+                    <p className="text-2xl font-bold mt-1 text-yellow-500">{stats.pending}</p>
                   </div>
                   <div className="p-3 bg-yellow-500/10 rounded-lg">
                     <Clock className="h-6 w-6 text-yellow-500" />
@@ -99,12 +99,12 @@ export default function DocumentsPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg bg-slate-900 border-white/10">
+            <Card className="shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-300">Expired</p>
-                    <p className="text-2xl font-bold mt-1 text-red-400">{stats.expired}</p>
+                    <p className="text-sm text-muted-foreground">Expired</p>
+                    <p className="text-2xl font-bold mt-1 text-red-500">{stats.expired}</p>
                   </div>
                   <div className="p-3 bg-red-500/10 rounded-lg">
                     <AlertCircle className="h-6 w-6 text-red-500" />

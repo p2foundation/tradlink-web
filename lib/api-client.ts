@@ -23,7 +23,6 @@ const processQueue = (error: any, token: string | null = null) => {
   })
   failedQueue = []
 }
-
 // Add auth token to requests
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
@@ -34,7 +33,6 @@ apiClient.interceptors.request.use((config) => {
   }
   return config
 })
-
 // Handle auth errors
 apiClient.interceptors.response.use(
   (response) => response,
@@ -66,19 +64,34 @@ apiClient.interceptors.response.use(
       isRefreshing = true
       try {
         const refreshToken = getRefreshToken()
-        if (!refreshToken) throw new Error('No refresh token')
+        if (!refreshToken) {
+          clearTokens()
+          window.location.href = '/login'
+          return Promise.reject(new Error('No refresh token available'))
+        }
+        
         const refreshRes = await apiClient.post('/auth/refresh', { refreshToken })
         const { accessToken, refreshToken: newRefresh } = refreshRes.data
+        
+        if (!accessToken) {
+          throw new Error('No access token received from refresh')
+        }
+        
         setTokens({ accessToken, refreshToken: newRefresh ?? refreshToken })
         processQueue(null, accessToken)
         if (originalRequest.headers) {
           originalRequest.headers['Authorization'] = 'Bearer ' + accessToken
         }
         return apiClient(originalRequest)
-      } catch (err) {
-        processQueue(err, null)
+      } catch (err: any) {
+        // Clear tokens on any refresh error (invalid signature, expired, etc.)
         clearTokens()
-        window.location.href = '/login'
+        processQueue(err, null)
+        
+        // Only redirect if we're not already on the login page
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login'
+        }
         return Promise.reject(err)
       } finally {
         isRefreshing = false

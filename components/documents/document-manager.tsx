@@ -250,17 +250,17 @@ export function DocumentManager() {
 
   if (loading) {
     return (
-      <Card className="shadow-lg bg-slate-900/80 border-white/10 text-slate-100">
+      <Card className="shadow-lg">
         <CardContent className="p-12 text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-gray-400 mt-4">Loading documents...</p>
+          <p className="text-muted-foreground mt-4">Loading documents...</p>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="shadow-lg bg-slate-900/80 border-white/10 text-slate-100">
+    <Card className="shadow-lg">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -268,7 +268,7 @@ export function DocumentManager() {
               <FileText className="h-6 w-6 text-primary" />
               Document Management
             </CardTitle>
-            <p className="text-sm text-gray-300 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Upload, verify, and manage your trade documents
             </p>
           </div>
@@ -302,10 +302,10 @@ export function DocumentManager() {
                   type="file"
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                   onChange={handleFileSelect}
-                  className="bg-slate-800 border-slate-700 text-slate-100"
+                  className=""
                 />
                 {selectedFile && (
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
                   </p>
                 )}
@@ -317,7 +317,7 @@ export function DocumentManager() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Export License 2024"
-                  className="bg-slate-800 border-slate-700 text-slate-100"
+                  className=""
                   required
                 />
               </div>
@@ -327,11 +327,11 @@ export function DocumentManager() {
                   id="type"
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as DocumentType })}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   required
                 >
                   {Object.entries(DOCUMENT_TYPE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value} className="bg-slate-800 text-slate-100">
+                    <option key={value} value={value}>
                       {label}
                     </option>
                   ))}
@@ -344,7 +344,7 @@ export function DocumentManager() {
                   value={formData.referenceNumber}
                   onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
                   placeholder="e.g., GEPA-2024-12345"
-                  className="bg-slate-800 border-slate-700 text-slate-100"
+                  className=""
                 />
               </div>
               <div>
@@ -354,7 +354,7 @@ export function DocumentManager() {
                   value={formData.issuedBy}
                   onChange={(e) => setFormData({ ...formData, issuedBy: e.target.value })}
                   placeholder="e.g., GEPA, GRA Customs"
-                  className="bg-slate-800 border-slate-700 text-slate-100"
+                  className=""
                 />
               </div>
               <div>
@@ -364,7 +364,7 @@ export function DocumentManager() {
                   type="date"
                   value={formData.expiryDate}
                   onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-slate-100"
+                  className=""
                 />
               </div>
               <div>
@@ -374,7 +374,7 @@ export function DocumentManager() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Additional notes about this document"
-                  className="bg-slate-800 border-slate-700 text-slate-100"
+                  className=""
                 />
               </div>
               <div className="flex gap-2">
@@ -409,7 +409,7 @@ export function DocumentManager() {
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center justify-between p-4 border rounded-lg border-white/10 bg-slate-900 hover:bg-slate-800/80 transition-colors"
+              className="flex items-center justify-between p-4 border rounded-lg border-border bg-card hover:bg-card/80 transition-colors"
             >
               <div className="flex items-center space-x-4 flex-1">
                 <div className="p-2 bg-primary/10 rounded-lg">
@@ -417,10 +417,10 @@ export function DocumentManager() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium truncate text-white">{doc.name}</p>
+                    <p className="font-medium truncate text-foreground">{doc.name}</p>
                     {getStatusIcon(doc.status)}
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-300 flex-wrap">
+                  <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
                     <span>{DOCUMENT_TYPE_LABELS[doc.type] || doc.type}</span>
                     {doc.referenceNumber && (
                       <>
@@ -439,7 +439,7 @@ export function DocumentManager() {
                     {doc.verifiedAt && (
                       <>
                         <span>•</span>
-                        <span className="text-emerald-300">Verified {formatDate(doc.verifiedAt)}</span>
+                        <span className="text-emerald-500">Verified {formatDate(doc.verifiedAt)}</span>
                       </>
                     )}
                     {doc.expiryDate && (
@@ -459,7 +459,6 @@ export function DocumentManager() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-slate-200 hover:text-white"
                   onClick={() => handleView(doc)}
                 >
                   <Eye className="h-4 w-4" />
@@ -467,7 +466,6 @@ export function DocumentManager() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-slate-200 hover:text-white"
                   onClick={() => handleDownload(doc)}
                 >
                   <Download className="h-4 w-4" />
@@ -479,8 +477,8 @@ export function DocumentManager() {
 
         {documents.length === 0 && !loading && (
           <div className="text-center py-12">
-            <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400">No documents uploaded yet</p>
+            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No documents uploaded yet</p>
             <Button className="mt-4" variant="outline" onClick={() => setShowUploadForm(true)}>
               <Upload className="h-4 w-4 mr-2" />
               Upload Your First Document

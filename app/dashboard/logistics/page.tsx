@@ -187,12 +187,12 @@ export default function LogisticsPage() {
   }
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Logistics & Shipments</h1>
-          <p className="text-gray-300 mt-1">Track and manage all your shipments</p>
+          <h1 className="text-3xl font-bold text-foreground">Logistics & Shipments</h1>
+          <p className="text-muted-foreground mt-1">Track and manage all your shipments</p>
         </div>
         <Button variant="outline" size="sm">
           <Download className="h-4 w-4 mr-2" />
@@ -202,63 +202,63 @@ export default function LogisticsPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-slate-900 border-white/10">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Total Shipments</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Shipments</CardTitle>
             <Package className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.total}</div>
-            <p className="text-xs text-gray-400 mt-1">All shipments</p>
+            <div className="text-2xl font-bold text-foreground">{stats.total}</div>
+            <p className="text-xs text-muted-foreground mt-1">All shipments</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">In Transit</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">In Transit</CardTitle>
             <Truck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.inTransit}</div>
-            <p className="text-xs text-gray-400 mt-1">Active shipments</p>
+            <div className="text-2xl font-bold text-foreground">{stats.inTransit}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active shipments</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Delivered</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Delivered</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.delivered}</div>
-            <p className="text-xs text-gray-400 mt-1">Completed</p>
+            <div className="text-2xl font-bold text-foreground">{stats.delivered}</div>
+            <p className="text-xs text-muted-foreground mt-1">Completed</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
             <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.pending}</div>
-            <p className="text-xs text-gray-400 mt-1">Awaiting processing</p>
+            <div className="text-2xl font-bold text-foreground">{stats.pending}</div>
+            <p className="text-xs text-muted-foreground mt-1">Awaiting processing</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="bg-slate-900 border-white/10">
+      <Card>
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by tracking number, crop, destination..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700 text-slate-100"
+                  className="pl-10"
                 />
               </div>
             </div>
@@ -303,11 +303,11 @@ export default function LogisticsPage() {
             <ShipmentCard key={shipment.id} {...shipment} />
           ))
         ) : (
-          <Card className="bg-slate-900 border-white/10">
+          <Card>
             <CardContent className="p-12 text-center">
-              <Truck className="h-12 w-12 mx-auto text-gray-500 mb-4" />
-              <p className="text-gray-400">No shipments found</p>
-              <p className="text-sm text-gray-500 mt-2">
+              <Truck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No shipments found</p>
+              <p className="text-sm text-muted-foreground/70 mt-2">
                 {search || statusFilter !== 'ALL'
                   ? 'Try adjusting your search or filters'
                   : 'Shipments will appear here once transactions are created'}
@@ -319,8 +319,8 @@ export default function LogisticsPage() {
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-          <div className="text-sm text-gray-400">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <div className="text-sm text-muted-foreground">
             Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
             {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} shipments
           </div>

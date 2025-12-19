@@ -165,7 +165,7 @@ export function ExportCompanyDashboard({ user }: { user: any }) {
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
             Export Company Dashboard
           </h1>
-          <p className="text-gray-300 mt-1">Manage your supplier network, orders, and logistics operations</p>
+          <p className="text-muted-foreground mt-1">Manage your supplier network, orders, and logistics operations</p>
         </div>
         <Link href="/dashboard/supplier-network">
           <Button className="shadow-glow">
@@ -177,58 +177,60 @@ export function ExportCompanyDashboard({ user }: { user: any }) {
 
       {/* Quick Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Supplier Network</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Supplier Network</CardTitle>
             <Users className="h-4 w-4 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.supplierNetwork}</div>
-            <p className="text-xs text-gray-400 mt-1">Active suppliers</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.supplierNetwork}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active suppliers</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Active Orders</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Orders</CardTitle>
             <ShoppingBag className="h-4 w-4 text-blue-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.activeOrders}</div>
-            <p className="text-xs text-gray-400 mt-1">In progress</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.activeOrders}</div>
+            <p className="text-xs text-muted-foreground mt-1">In progress</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Shipments</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Shipments</CardTitle>
             <Truck className="h-4 w-4 text-green-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.shipments}</div>
-            <p className="text-xs text-gray-400 mt-1">In transit</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.shipments}</div>
+            <p className="text-xs text-muted-foreground mt-1">In transit</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Monthly Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Revenue</CardTitle>
             <DollarSign className="h-4 w-4 text-emerald-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{formatCurrency(stats.monthlyRevenue)}</div>
-            <p className="text-xs text-gray-400 mt-1">This month • {currency.code}</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate" title={formatCurrency(stats.monthlyRevenue)}>
+              {formatCurrency(stats.monthlyRevenue)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">This month • {currency.code}</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Quality Compliance</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Quality Compliance</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-green-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.qualityCompliance}%</div>
-            <p className="text-xs text-gray-400 mt-1">Standards met</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.qualityCompliance}%</div>
+            <p className="text-xs text-muted-foreground mt-1">Standards met</p>
           </CardContent>
         </Card>
       </div>
@@ -236,20 +238,20 @@ export function ExportCompanyDashboard({ user }: { user: any }) {
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/dashboard/supplier-network">
-          <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-all cursor-pointer h-full">
+          <Card className="hover:shadow-glow transition-all cursor-pointer h-full">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-white">Supplier Network</CardTitle>
-                  <p className="text-sm text-gray-400">Manage suppliers & deals</p>
+                  <CardTitle>Supplier Network</CardTitle>
+                  <p className="text-sm text-muted-foreground">Manage suppliers & deals</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-foreground">
                 Manage your network of {stats.supplierNetwork} verified suppliers, track deals, and monitor performance.
               </p>
               <div className="flex items-center gap-2 mt-4 text-primary text-sm font-medium">
@@ -260,20 +262,20 @@ export function ExportCompanyDashboard({ user }: { user: any }) {
         </Link>
 
         <Link href="/dashboard/bulk-procurement">
-          <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-all cursor-pointer h-full">
+          <Card className="hover:shadow-glow transition-all cursor-pointer h-full">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-500/10 rounded-lg">
                   <ShoppingBag className="h-5 w-5 text-blue-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-white">Bulk Procurement</CardTitle>
-                  <p className="text-sm text-gray-400">Aggregate & source</p>
+                  <CardTitle>Bulk Procurement</CardTitle>
+                  <p className="text-sm text-muted-foreground">Aggregate & source</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-foreground">
                 Manage {stats.activeOrders} active orders and create bulk sourcing requests from your supplier network.
               </p>
               <div className="flex items-center gap-2 mt-4 text-blue-500 text-sm font-medium">
@@ -284,20 +286,20 @@ export function ExportCompanyDashboard({ user }: { user: any }) {
         </Link>
 
         <Link href="/dashboard/logistics">
-          <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-all cursor-pointer h-full">
+          <Card className="hover:shadow-glow transition-all cursor-pointer h-full">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-500/10 rounded-lg">
                   <Truck className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-white">Logistics</CardTitle>
-                  <p className="text-sm text-gray-400">Track shipments</p>
+                  <CardTitle>Logistics</CardTitle>
+                  <p className="text-sm text-muted-foreground">Track shipments</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-foreground">
                 Track {stats.shipments} active shipments and manage logistics operations.
               </p>
               <div className="flex items-center gap-2 mt-4 text-green-500 text-sm font-medium">
@@ -309,12 +311,12 @@ export function ExportCompanyDashboard({ user }: { user: any }) {
       </div>
 
       {/* Recent Shipments with Tracking */}
-      <Card className="bg-slate-900 border-white/10">
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-white">Active Shipments & Tracking</CardTitle>
-              <p className="text-sm text-gray-400 mt-1">
+              <CardTitle>Active Shipments & Tracking</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
                 Monitor shipments in real-time • {stats.activeShipments} active, {stats.deliveredShipments} delivered
               </p>
             </div>
@@ -336,18 +338,18 @@ export function ExportCompanyDashboard({ user }: { user: any }) {
 
       {/* Performance Metrics */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="bg-slate-900 border-white/10">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-white">Quality Performance</CardTitle>
+            <CardTitle>Quality Performance</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-300">Overall Compliance</span>
-                  <span className="text-sm font-semibold text-white">{stats.qualityCompliance}%</span>
+                  <span className="text-sm text-foreground">Overall Compliance</span>
+                  <span className="text-sm font-semibold text-foreground">{stats.qualityCompliance}%</span>
                 </div>
-                <div className="w-full bg-slate-800 rounded-full h-2">
+                <div className="w-full bg-muted rounded-full h-2">
                   <div
                     className="bg-green-500 h-2 rounded-full"
                     style={{ width: `${stats.qualityCompliance}%` }}
@@ -356,40 +358,44 @@ export function ExportCompanyDashboard({ user }: { user: any }) {
               </div>
               <div className="flex items-center gap-4 text-sm">
                 <div>
-                  <p className="text-gray-400">Certified Suppliers</p>
-                  <p className="text-white font-semibold">{Math.round(stats.supplierNetwork * 0.85)}</p>
+                  <p className="text-muted-foreground">Certified Suppliers</p>
+                  <p className="text-foreground font-semibold">{Math.round(stats.supplierNetwork * 0.85)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Quality Issues</p>
-                  <p className="text-white font-semibold">2</p>
+                  <p className="text-muted-foreground">Quality Issues</p>
+                  <p className="text-foreground font-semibold">2</p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-white">Revenue Trend</CardTitle>
+            <CardTitle>Revenue Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-white">{formatCurrency(stats.monthlyRevenue)}</p>
-                  <p className="text-sm text-gray-400">This month • {currency.code}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-foreground truncate" title={formatCurrency(stats.monthlyRevenue)}>
+                    {formatCurrency(stats.monthlyRevenue)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">This month • {currency.code}</p>
                 </div>
                 <div className="p-3 bg-emerald-500/10 rounded-lg">
                   <TrendingUp className="h-6 w-6 text-emerald-500" />
                 </div>
               </div>
               <div className="flex items-center gap-4 text-sm">
-                <div>
-                  <p className="text-gray-400">Last Month</p>
-                  <p className="text-white font-semibold">{formatCurrency(stats.monthlyRevenue * 0.92)}</p>
+                <div className="min-w-0">
+                  <p className="text-muted-foreground">Last Month</p>
+                  <p className="text-foreground font-semibold truncate" title={formatCurrency(stats.monthlyRevenue * 0.92)}>
+                    {formatCurrency(stats.monthlyRevenue * 0.92)}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Growth</p>
+                  <p className="text-muted-foreground">Growth</p>
                   <p className="text-emerald-500 font-semibold">+8.7%</p>
                 </div>
               </div>

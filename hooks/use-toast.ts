@@ -6,12 +6,14 @@ import type { ToastActionElement, ToastProps } from '@/components/ui/toast'
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 5000
+const TOAST_ERROR_DELAY = 10000 // 10 seconds for error messages
 
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  duration?: number
 }
 
 const actionTypes = {
@@ -54,10 +56,13 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
-const addToRemoveQueue = (toastId: string) => {
+const addToRemoveQueue = (toastId: string, duration?: number) => {
   if (toastTimeouts.has(toastId)) {
     return
   }
+
+  // Use custom duration if provided, otherwise use default based on variant
+  const delay = duration ?? TOAST_REMOVE_DELAY
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
@@ -65,7 +70,7 @@ const addToRemoveQueue = (toastId: string) => {
       type: 'REMOVE_TOAST',
       toastId: toastId,
     })
-  }, TOAST_REMOVE_DELAY)
+  }, delay)
 
   toastTimeouts.set(toastId, timeout)
 }
@@ -90,10 +95,11 @@ export const reducer = (state: State, action: Action): State => {
       const { toastId } = action
 
       if (toastId) {
-        addToRemoveQueue(toastId)
+        const toast = state.toasts.find((t) => t.id === toastId)
+        addToRemoveQueue(toastId, toast?.duration)
       } else {
         state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)
+          addToRemoveQueue(toast.id, toast.duration)
         })
       }
 
@@ -136,27 +142,44 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, 'id'>
 
-function toast({ ...props }: Toast) {
+function toast({ duration, variant, ...props }: Toast) {
   const id = genId()
+
+  // Auto-set longer duration for error/destructive toasts if not explicitly provided
+  const toastDuration = duration ?? (variant === 'destructive' ? TOAST_ERROR_DELAY : TOAST_REMOVE_DELAY)
 
   const update = (props: ToasterToast) =>
     dispatch({
       type: 'UPDATE_TOAST',
       toast: { ...props, id },
     })
-  const dismiss = () => dispatch({ type: 'DISMISS_TOAST', toastId: id })
+  const dismiss = () => {
+    // Clear any pending timeout
+    const timeout = toastTimeouts.get(id)
+    if (timeout) {
+      clearTimeout(timeout)
+      toastTimeouts.delete(id)
+    }
+    dispatch({ type: 'DISMISS_TOAST', toastId: id })
+  }
 
   dispatch({
     type: 'ADD_TOAST',
     toast: {
       ...props,
+      variant,
       id,
+      duration: toastDuration,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
     },
   })
+
+  // Set up auto-dismiss timeout as backup (Radix UI also handles duration)
+  // This ensures the toast is removed from our state even if Radix doesn't fire onOpenChange
+  addToRemoveQueue(id, toastDuration)
 
   return {
     id: id,

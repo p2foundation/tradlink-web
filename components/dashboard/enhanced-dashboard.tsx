@@ -105,8 +105,8 @@ export function EnhancedDashboard() {
   if (!dashboardData) {
     return (
       <div className="text-center py-12">
-        <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-500">Failed to load dashboard data</p>
+        <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <p className="text-muted-foreground">Failed to load dashboard data</p>
       </div>
     )
   }
@@ -129,7 +129,7 @@ export function EnhancedDashboard() {
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
             Dashboard
           </h1>
-          <p className="text-gray-600 mt-1">Real-time insights and analytics</p>
+          <p className="text-muted-foreground mt-1">Real-time insights and analytics</p>
         </div>
         <div className="flex gap-2">
           {(['7d', '30d', '90d'] as const).map((range) => (
@@ -141,8 +141,8 @@ export function EnhancedDashboard() {
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 timeRange === range
-                  ? 'bg-primary text-white shadow-glow'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-primary text-primary-foreground shadow-glow'
+                  : 'bg-muted text-foreground hover:bg-accent'
               }`}
             >
               {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : '90 Days'}
@@ -312,12 +312,12 @@ export function EnhancedDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Clock className="h-6 w-6 text-blue-600" />
+              <div className="p-3 bg-blue-500/10 rounded-lg">
+                <Clock className="h-6 w-6 text-blue-500" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-blue-600">2.5 hrs</div>
-                <p className="text-sm text-gray-600 mt-1">Average clearance</p>
+                <div className="text-3xl font-bold text-blue-500">2.5 hrs</div>
+                <p className="text-sm text-muted-foreground mt-1">Average clearance</p>
               </div>
             </div>
           </CardContent>
@@ -329,12 +329,12 @@ export function EnhancedDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <CheckCircle2 className="h-6 w-6 text-purple-600" />
+              <div className="p-3 bg-purple-500/10 rounded-lg">
+                <CheckCircle2 className="h-6 w-6 text-purple-500" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-purple-600">94.2%</div>
-                <p className="text-sm text-gray-600 mt-1">Match success</p>
+                <div className="text-3xl font-bold text-purple-500">94.2%</div>
+                <p className="text-sm text-muted-foreground mt-1">Match success</p>
               </div>
             </div>
           </CardContent>
@@ -359,17 +359,17 @@ export function EnhancedDashboard() {
             {recentTransactions?.slice(0, 5).map((tx: any, idx: number) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between p-4 rounded-lg bg-card/50 hover:bg-card transition-colors"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-green-600" />
+                  <div className="p-2 bg-green-500/10 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-green-500" />
                   </div>
                   <div>
-                    <p className="font-medium">
+                    <p className="font-medium text-foreground">
                       {tx.match?.listing?.cropType || 'Transaction'}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       {tx.buyer?.user?.firstName} {tx.buyer?.user?.lastName}
                     </p>
                   </div>
@@ -378,14 +378,14 @@ export function EnhancedDashboard() {
                   <p className="font-semibold text-green-600">
                     {formatCurrency(tx.totalValue)}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {new Date(tx.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </div>
             ))}
             {(!recentTransactions || recentTransactions.length === 0) && (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-muted-foreground">
                 No recent transactions
               </div>
             )}

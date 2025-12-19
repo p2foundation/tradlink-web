@@ -31,7 +31,7 @@ const statusConfig: Record<ShipmentStatus, { label: string; variant: 'default' |
     label: 'Pending',
     variant: 'outline',
     icon: Clock,
-    color: 'text-gray-400',
+    color: 'text-muted-foreground',
   },
   'processing': {
     label: 'Processing',
@@ -79,7 +79,7 @@ export function ShipmentCard({
   const Icon = config.icon
 
   return (
-    <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-all">
+    <Card className="hover:shadow-glow transition-all">
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 flex-1">
@@ -88,26 +88,26 @@ export function ShipmentCard({
               status === 'in-transit' ? 'bg-blue-500/10' :
               status === 'processing' ? 'bg-yellow-500/10' :
               status === 'cancelled' ? 'bg-red-500/10' :
-              'bg-gray-500/10'
+              'bg-muted'
             }`}>
               <Icon className={`h-5 w-5 ${config.color}`} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-2">
-                <h3 className="font-semibold text-lg text-white truncate">{cropType}</h3>
+                <h3 className="font-semibold text-lg text-foreground truncate">{cropType}</h3>
                 <Badge variant={config.variant} className="text-xs whitespace-nowrap">
                   {config.label}
                 </Badge>
               </div>
-              <div className="space-y-1 text-sm text-gray-400">
+              <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
-                  <span className="font-medium text-white">Quantity:</span> {quantity}
+                  <span className="font-medium text-foreground">Quantity:</span> {quantity}
                 </p>
                 {origin && (
                   <div className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     <span>
-                      <span className="font-medium text-white">From:</span> {origin}
+                      <span className="font-medium text-foreground">From:</span> {origin}
                     </span>
                   </div>
                 )}
@@ -115,34 +115,34 @@ export function ShipmentCard({
                   <div className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     <span>
-                      <span className="font-medium text-white">To:</span> {destination}
+                      <span className="font-medium text-foreground">To:</span> {destination}
                     </span>
                   </div>
                 )}
                 {trackingNumber && (
                   <p>
-                    <span className="font-medium text-white">Tracking:</span>{' '}
+                    <span className="font-medium text-foreground">Tracking:</span>{' '}
                     <span className="font-mono text-xs">{trackingNumber}</span>
                   </p>
                 )}
                 {carrier && (
                   <p>
-                    <span className="font-medium text-white">Carrier:</span> {carrier}
+                    <span className="font-medium text-foreground">Carrier:</span> {carrier}
                   </p>
                 )}
                 {shipmentDate && (
                   <p>
-                    <span className="font-medium text-white">Shipped:</span> {formatDate(shipmentDate)}
+                    <span className="font-medium text-foreground">Shipped:</span> {formatDate(shipmentDate)}
                   </p>
                 )}
                 {estimatedDelivery && !deliveryDate && (
                   <p>
-                    <span className="font-medium text-white">ETA:</span> {formatDate(estimatedDelivery)}
+                    <span className="font-medium text-foreground">ETA:</span> {formatDate(estimatedDelivery)}
                   </p>
                 )}
                 {deliveryDate && (
                   <p>
-                    <span className="font-medium text-white">Delivered:</span> {formatDate(deliveryDate)}
+                    <span className="font-medium text-foreground">Delivered:</span> {formatDate(deliveryDate)}
                   </p>
                 )}
               </div>

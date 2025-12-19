@@ -97,6 +97,13 @@ export default function SettingsPage() {
       language: savedLanguage,
       theme: savedTheme,
     }))
+
+    // Apply theme to document on load
+    if (savedTheme === 'light') {
+      document.documentElement.classList.add('light')
+    } else {
+      document.documentElement.classList.remove('light')
+    }
   }, [])
 
   const handleUpdateProfile = async () => {
@@ -267,11 +274,11 @@ export default function SettingsPage() {
         <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
           Settings
         </h1>
-        <p className="text-gray-400 mt-1">Manage your account settings and preferences</p>
+        <p className="text-muted-foreground mt-1">Manage your account settings and preferences</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-800 overflow-x-auto">
+      <div className="flex gap-2 border-b border-border overflow-x-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
@@ -282,7 +289,7 @@ export default function SettingsPage() {
               className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
                 isActive
                   ? 'border-emerald-500 text-emerald-400'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -294,13 +301,13 @@ export default function SettingsPage() {
 
       {/* Profile Tab */}
       {activeTab === 'profile' && (
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
               Profile Information
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription>
               Update your personal information and profile picture
             </CardDescription>
           </CardHeader>
@@ -312,42 +319,40 @@ export default function SettingsPage() {
                   {profile.firstName?.[0]?.toUpperCase() || 'U'}
                   {profile.lastName?.[0]?.toUpperCase() || ''}
                 </div>
-                <button className="absolute bottom-0 right-0 p-2 bg-slate-800 rounded-full border-2 border-slate-700 hover:bg-slate-700 transition-colors">
-                  <Camera className="h-4 w-4 text-slate-300" />
+                <button className="absolute bottom-0 right-0 p-2 bg-background rounded-full border-2 border-border hover:bg-accent transition-colors">
+                  <Camera className="h-4 w-4 text-foreground" />
                 </button>
               </div>
               <div>
-                <p className="text-sm text-gray-400">Profile Picture</p>
-                <p className="text-xs text-gray-500">Click the camera icon to upload a new photo</p>
+                <p className="text-sm text-muted-foreground">Profile Picture</p>
+                <p className="text-xs text-muted-foreground/70">Click the camera icon to upload a new photo</p>
               </div>
             </div>
 
             {/* Form Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-slate-200">
+                <Label htmlFor="firstName">
                   First Name
                 </Label>
                 <Input
                   id="firstName"
                   value={profile.firstName}
                   onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-slate-100"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-slate-200">
+                <Label htmlFor="lastName">
                   Last Name
                 </Label>
                 <Input
                   id="lastName"
                   value={profile.lastName}
                   onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-slate-100"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-200 flex items-center gap-2">
+                <Label htmlFor="email" className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   Email
                 </Label>
@@ -356,7 +361,6 @@ export default function SettingsPage() {
                   type="email"
                   value={profile.email}
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-slate-100"
                 />
                 {user?.verified && (
                   <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
@@ -366,7 +370,7 @@ export default function SettingsPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-slate-200 flex items-center gap-2">
+                <Label htmlFor="phone" className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
                   Phone
                 </Label>
@@ -375,7 +379,6 @@ export default function SettingsPage() {
                   type="tel"
                   value={profile.phone}
                   onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-slate-100"
                 />
               </div>
             </div>
@@ -410,13 +413,13 @@ export default function SettingsPage() {
                 <Lock className="h-5 w-5" />
                 Change Password
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription>
                 Update your password to keep your account secure
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword" className="text-slate-200">
+                <Label htmlFor="currentPassword">
                   Current Password
                 </Label>
                 <div className="relative">
@@ -425,7 +428,7 @@ export default function SettingsPage() {
                     type={account.showPasswords ? 'text' : 'password'}
                     value={account.currentPassword}
                     onChange={(e) => setAccount({ ...account, currentPassword: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-slate-100 pr-10"
+                    className="pr-10"
                   />
                   <button
                     type="button"
@@ -437,7 +440,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-slate-200">
+                <Label htmlFor="newPassword">
                   New Password
                 </Label>
                 <Input
@@ -477,14 +480,14 @@ export default function SettingsPage() {
                 <Mail className="h-5 w-5" />
                 Email Verification
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription>
                 Verify your email address to secure your account
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-200">{profile.email}</p>
+                  <p className="text-foreground">{profile.email}</p>
                   {user?.verified ? (
                     <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 mt-2">
                       <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -498,7 +501,7 @@ export default function SettingsPage() {
                   )}
                 </div>
                 {!user?.verified && (
-                  <Button variant="outline" className="border-slate-700">
+                  <Button variant="outline">
                     Send Verification Email
                   </Button>
                 )}
@@ -517,13 +520,13 @@ export default function SettingsPage() {
                 <Languages className="h-5 w-5" />
                 Language & Region
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription>
                 Choose your preferred language
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-slate-200">Language</Label>
+                <Label>Language</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {LANGUAGES.map((lang) => (
                     <button
@@ -532,11 +535,11 @@ export default function SettingsPage() {
                       className={`p-4 rounded-lg border-2 transition-all text-left ${
                         preferences.language === lang.code
                           ? 'border-emerald-500 bg-emerald-500/10'
-                          : 'border-slate-700 bg-slate-800 hover:border-slate-600'
+                          : 'border-border bg-card hover:bg-accent'
                       }`}
                     >
-                      <p className="font-semibold text-slate-100">{lang.native}</p>
-                      <p className="text-sm text-slate-400">{lang.name}</p>
+                      <p className="font-semibold text-foreground">{lang.native}</p>
+                      <p className="text-sm text-muted-foreground">{lang.name}</p>
                     </button>
                   ))}
                 </div>
@@ -550,13 +553,13 @@ export default function SettingsPage() {
                 <DollarSign className="h-5 w-5" />
                 Currency Preference
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription>
                 Select your preferred currency for displaying prices and transactions
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-slate-200">Default Currency</Label>
+                <Label>Default Currency</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {CURRENCIES.map((curr) => (
                     <button
@@ -565,15 +568,15 @@ export default function SettingsPage() {
                       className={`p-4 rounded-lg border-2 transition-all text-left ${
                         currency.code === curr.code
                           ? 'border-emerald-500 bg-emerald-500/10'
-                          : 'border-slate-700 bg-slate-800 hover:border-slate-600'
+                          : 'border-border bg-card hover:bg-accent'
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
                         {curr.flag && <span className="text-2xl">{curr.flag}</span>}
                         <p className="font-semibold text-slate-100">{curr.code}</p>
                       </div>
-                      <p className="text-sm text-slate-400">{curr.name}</p>
-                      <p className="text-xs text-slate-500 mt-1">Symbol: {curr.symbol}</p>
+                      <p className="text-sm text-muted-foreground">{curr.name}</p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">Symbol: {curr.symbol}</p>
                     </button>
                   ))}
                 </div>
@@ -592,39 +595,42 @@ export default function SettingsPage() {
                 <Moon className="h-5 w-5" />
                 Appearance
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription>
                 Customize the look and feel of the platform
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-slate-200">Theme</Label>
+                <Label>Theme</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => handleThemeChange('dark')}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       preferences.theme === 'dark'
                         ? 'border-emerald-500 bg-emerald-500/10'
-                        : 'border-slate-700 bg-slate-800 hover:border-slate-600'
+                        : 'border-border bg-card hover:bg-accent'
                     }`}
                   >
-                    <Moon className="h-6 w-6 text-slate-300 mb-2" />
-                    <p className="font-semibold text-slate-100">Dark</p>
-                    <p className="text-sm text-slate-400">Default theme</p>
+                    <Moon className="h-6 w-6 text-foreground mb-2" />
+                    <p className="font-semibold text-foreground">Dark</p>
+                    <p className="text-sm text-muted-foreground">Default theme</p>
                   </button>
                   <button
                     onClick={() => handleThemeChange('light')}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       preferences.theme === 'light'
                         ? 'border-emerald-500 bg-emerald-500/10'
-                        : 'border-slate-700 bg-slate-800 hover:border-slate-600'
+                        : 'border-border bg-card hover:bg-accent'
                     }`}
                   >
-                    <Sun className="h-6 w-6 text-slate-300 mb-2" />
-                    <p className="font-semibold text-slate-100">Light</p>
-                    <p className="text-sm text-slate-400">Light mode</p>
+                    <Sun className="h-6 w-6 text-foreground mb-2" />
+                    <p className="font-semibold text-foreground">Light</p>
+                    <p className="text-sm text-muted-foreground">Light mode</p>
                   </button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Theme preference is saved and applied across the platform.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -635,7 +641,7 @@ export default function SettingsPage() {
                 <Bell className="h-5 w-5" />
                 Notifications
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription>
                 Manage how you receive notifications
               </CardDescription>
             </CardHeader>
@@ -726,7 +732,7 @@ export default function SettingsPage() {
                 <Shield className="h-5 w-5" />
                 Security Settings
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription>
                 Manage your account security and privacy
               </CardDescription>
             </CardHeader>
@@ -766,7 +772,7 @@ export default function SettingsPage() {
                 <Download className="h-5 w-5" />
                 Data Management
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription>
                 Export or delete your account data
               </CardDescription>
             </CardHeader>

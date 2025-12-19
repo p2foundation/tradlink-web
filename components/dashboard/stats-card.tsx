@@ -35,8 +35,10 @@ export function StatsCard({
           <Icon className="h-4 w-4" />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+      <CardContent className="min-w-0">
+        <div className="text-xl sm:text-2xl font-bold truncate" title={String(value)}>
+          {value}
+        </div>
         {trend !== undefined && trendLabel && (
           <p className="text-xs text-muted-foreground mt-1">
             <span className={trend >= 0 ? 'text-green-600' : 'text-red-600'}>

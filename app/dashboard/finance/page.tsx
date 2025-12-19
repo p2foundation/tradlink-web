@@ -252,14 +252,14 @@ export default function FinancePage() {
   }
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
             {getPageTitle()}
           </h1>
-          <p className="text-gray-300 mt-1">{getPageDescription()}</p>
+          <p className="text-muted-foreground mt-1">{getPageDescription()}</p>
         </div>
         {user?.role === UserRole.BUYER && (
           <Link href="/dashboard/transactions">
@@ -275,141 +275,141 @@ export default function FinancePage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {user?.role === UserRole.FARMER ? (
           <>
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Total Earnings</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Earnings</CardTitle>
                 <DollarSign className="h-4 w-4 text-emerald-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{formatCurrency(stats.totalEarnings)}</div>
-                <p className="text-xs text-gray-400 mt-1">All-time revenue • {currency.code}</p>
+                <div className="text-2xl font-bold text-foreground">{formatCurrency(stats.totalEarnings)}</div>
+                <p className="text-xs text-muted-foreground mt-1">All-time revenue • {currency.code}</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Pending Payments</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Pending Payments</CardTitle>
                 <Clock className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{stats.pendingPayments}</div>
-                <p className="text-xs text-gray-400 mt-1">Awaiting payment</p>
+                <div className="text-2xl font-bold text-foreground">{stats.pendingPayments}</div>
+                <p className="text-xs text-muted-foreground mt-1">Awaiting payment</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Completed Payments</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Completed Payments</CardTitle>
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{stats.completedPayments}</div>
-                <p className="text-xs text-gray-400 mt-1">Successful transactions</p>
+                <div className="text-2xl font-bold text-foreground">{stats.completedPayments}</div>
+                <p className="text-xs text-muted-foreground mt-1">Successful transactions</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Available Credit</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Available Credit</CardTitle>
                 <TrendingUp className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{formatCurrency(stats.availableCredit)}</div>
-                <p className="text-xs text-gray-400 mt-1">Credit limit</p>
+                <div className="text-2xl font-bold text-foreground">{formatCurrency(stats.availableCredit)}</div>
+                <p className="text-xs text-muted-foreground mt-1">Credit limit</p>
               </CardContent>
             </Card>
           </>
         ) : user?.role === UserRole.BUYER ? (
           <>
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Total Spent</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Spent</CardTitle>
                 <DollarSign className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{formatCurrency(stats.totalSpent)}</div>
-                <p className="text-xs text-gray-400 mt-1">This year • {currency.code}</p>
+                <div className="text-2xl font-bold text-foreground">{formatCurrency(stats.totalSpent)}</div>
+                <p className="text-xs text-muted-foreground mt-1">This year • {currency.code}</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Pending Payments</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Pending Payments</CardTitle>
                 <Clock className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{stats.pendingPayments}</div>
-                <p className="text-xs text-gray-400 mt-1">Awaiting processing</p>
+                <div className="text-2xl font-bold text-foreground">{stats.pendingPayments}</div>
+                <p className="text-xs text-muted-foreground mt-1">Awaiting processing</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Completed Payments</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Completed Payments</CardTitle>
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{stats.completedPayments}</div>
-                <p className="text-xs text-gray-400 mt-1">Successful payments</p>
+                <div className="text-2xl font-bold text-foreground">{stats.completedPayments}</div>
+                <p className="text-xs text-muted-foreground mt-1">Successful payments</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Payment Methods</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Payment Methods</CardTitle>
                 <CreditCard className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">5</div>
-                <p className="text-xs text-gray-400 mt-1">Available methods</p>
+                <div className="text-2xl font-bold text-foreground">5</div>
+                <p className="text-xs text-muted-foreground mt-1">Available methods</p>
               </CardContent>
             </Card>
           </>
         ) : (
           <>
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Total Payments</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Payments</CardTitle>
                 <DollarSign className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{payments.length}</div>
-                <p className="text-xs text-gray-400 mt-1">All payments</p>
+                <div className="text-2xl font-bold text-foreground">{payments.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">All payments</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Pending</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
                 <Clock className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{stats.pendingPayments}</div>
-                <p className="text-xs text-gray-400 mt-1">Awaiting action</p>
+                <div className="text-2xl font-bold text-foreground">{stats.pendingPayments}</div>
+                <p className="text-xs text-muted-foreground mt-1">Awaiting action</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Completed</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{stats.completedPayments}</div>
-                <p className="text-xs text-gray-400 mt-1">Successful</p>
+                <div className="text-2xl font-bold text-foreground">{stats.completedPayments}</div>
+                <p className="text-xs text-muted-foreground mt-1">Successful</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+            <Card className="hover:shadow-glow transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-300">Total Volume</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Volume</CardTitle>
                 <TrendingUp className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-foreground">
                   {formatCurrency(payments.reduce((sum, p) => sum + p.amount, 0))}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">All transactions</p>
+                <p className="text-xs text-muted-foreground mt-1">All transactions</p>
               </CardContent>
             </Card>
           </>
@@ -417,12 +417,12 @@ export default function FinancePage() {
       </div>
 
       {/* Payment History */}
-      <Card className="bg-slate-900 border-white/10">
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-white">Payment History</CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardTitle>Payment History</CardTitle>
+              <CardDescription>
                 {user?.role === UserRole.FARMER
                   ? 'Payments received from buyers'
                   : user?.role === UserRole.BUYER
@@ -430,7 +430,7 @@ export default function FinancePage() {
                   : 'All payment transactions'}
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm" className="bg-slate-800 border-slate-700 text-slate-100">
+            <Button variant="outline" size="sm">
               <Filter className="h-4 w-4 mr-2" />
               Filter
             </Button>
@@ -439,9 +439,9 @@ export default function FinancePage() {
         <CardContent>
           {payments.length === 0 ? (
             <div className="text-center py-12">
-              <DollarSign className="h-16 w-16 mx-auto text-gray-500 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No Payments Yet</h3>
-              <p className="text-gray-400 mb-6">
+              <DollarSign className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">No Payments Yet</h3>
+              <p className="text-muted-foreground mb-6">
                 {user?.role === UserRole.FARMER
                   ? 'You haven\'t received any payments yet. Complete transactions to see payments here.'
                   : user?.role === UserRole.BUYER
@@ -459,7 +459,7 @@ export default function FinancePage() {
               {payments.map((payment) => (
                 <div
                   key={payment.id}
-                  className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors border border-slate-700/50"
+                  className="flex items-center justify-between p-4 bg-card/50 rounded-lg hover:bg-card transition-colors border border-border"
                 >
                   <div className="flex items-center gap-4 flex-1">
                     <div className="p-3 bg-primary/10 rounded-lg text-primary">
@@ -467,12 +467,12 @@ export default function FinancePage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
-                        <h4 className="font-semibold text-white">
+                        <h4 className="font-semibold text-foreground">
                           {payment.transaction?.match?.listing?.cropType || 'Product Payment'}
                         </h4>
                         {getStatusBadge(payment.status)}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span>{getMethodLabel(payment.method)}</span>
                         <span>•</span>
                         <span>
@@ -487,15 +487,15 @@ export default function FinancePage() {
                           </>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {formatDate(payment.paymentDate || payment.createdAt)}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-lg font-bold text-white">{formatCurrency(payment.amount)}</p>
-                      <p className="text-xs text-gray-400">{payment.currency}</p>
+                      <p className="text-lg font-bold text-foreground">{formatCurrency(payment.amount)}</p>
+                      <p className="text-xs text-muted-foreground">{payment.currency}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {payment.receiptUrl && (
@@ -503,7 +503,6 @@ export default function FinancePage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => window.open(payment.receiptUrl, '_blank')}
-                          className="text-slate-300 hover:text-white"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -512,7 +511,6 @@ export default function FinancePage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => router.push(`/dashboard/transactions/${payment.transactionId}`)}
-                        className="text-slate-300 hover:text-white"
                       >
                         <ArrowRight className="h-4 w-4" />
                       </Button>
@@ -527,10 +525,10 @@ export default function FinancePage() {
 
       {/* Payment Methods Info */}
       {user?.role === UserRole.BUYER && (
-        <Card className="bg-slate-900 border-white/10">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-white">Available Payment Methods</CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardTitle>Available Payment Methods</CardTitle>
+            <CardDescription>
               Choose from multiple secure payment options
             </CardDescription>
           </CardHeader>
@@ -544,15 +542,15 @@ export default function FinancePage() {
               ].map(({ method, icon: Icon, color }) => (
                 <div
                   key={method}
-                  className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-primary/50 transition-colors"
+                  className="p-4 bg-card/50 rounded-lg border border-border hover:border-primary/50 transition-colors"
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <div className={`p-2 bg-primary/10 rounded-lg ${color}`}>
                       <Icon className="h-5 w-5" />
                     </div>
-                    <span className="font-semibold text-white">{getMethodLabel(method as PaymentMethod)}</span>
+                    <span className="font-semibold text-foreground">{getMethodLabel(method as PaymentMethod)}</span>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     {method === 'MOBILE_MONEY'
                       ? 'MTN, Vodafone, AirtelTigo'
                       : method === 'PAPSS'
@@ -568,15 +566,15 @@ export default function FinancePage() {
 
       {/* Finance Services (for Farmers) */}
       {user?.role === UserRole.FARMER && (
-        <Card className="bg-slate-900 border-white/10 border-l-4 border-l-emerald-500">
+        <Card className="border-l-4 border-l-emerald-500">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-6 w-6 text-emerald-500" />
                   Trade Finance Services
                 </CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardDescription>
                   Access financing and insurance solutions for your exports
                 </CardDescription>
               </div>
@@ -584,53 +582,53 @@ export default function FinancePage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div className="p-4 bg-card/50 rounded-lg border border-border">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start space-x-3">
                     <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
                       <TrendingUp className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-white">Export Finance Loan</h4>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <h4 className="font-semibold text-foreground">Export Finance Loan</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
                         Quick access to working capital for export transactions
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-muted-foreground">
                     <span>Up to {formatCurrency(50000)}</span>
                     <span className="mx-2">•</span>
                     <span>8.5% APR</span>
                   </div>
-                  <Button size="sm" variant="outline" className="bg-slate-800 border-slate-700 text-slate-100">
+                  <Button size="sm" variant="outline">
                     Apply
                   </Button>
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div className="p-4 bg-card/50 rounded-lg border border-border">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start space-x-3">
                     <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
                       <Shield className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-white">Trade Credit Insurance</h4>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <h4 className="font-semibold text-foreground">Trade Credit Insurance</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
                         Protect against buyer default and payment delays
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-muted-foreground">
                     <span>Coverage: {formatCurrency(25000)}</span>
                     <span className="mx-2">•</span>
                     <span>2.5% premium</span>
                   </div>
-                  <Button size="sm" variant="outline" className="bg-slate-800 border-slate-700 text-slate-100">
+                  <Button size="sm" variant="outline">
                     Learn More
                   </Button>
                 </div>

@@ -55,16 +55,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950 text-white">
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-background">
       {/* Mobile header */}
-      <div className="lg:hidden bg-slate-900/80 border-b border-white/10 px-4 py-3 flex items-center justify-between shadow-sm backdrop-blur">
+      <div className="lg:hidden bg-card/80 border-b border-border px-4 py-3 flex items-center justify-between shadow-sm backdrop-blur">
         <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
           TradeLink+
         </h1>
@@ -93,14 +93,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <aside
           className={`${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } lg:translate-x-0 fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 z-50 w-64 bg-slate-900/90 border-r border-white/10 transform transition-transform duration-200 ease-in-out shadow-2xl backdrop-blur`}
+          } lg:translate-x-0 fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 z-50 w-64 bg-card/90 border-r border-border transform transition-transform duration-200 ease-in-out shadow-2xl backdrop-blur`}
         >
           <div className="h-full flex flex-col">
-            <div className="p-6 border-b border-white/10">
+            <div className="p-6 border-b border-border">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
                 TradeLink+
               </h1>
-              <p className="text-sm text-slate-200/70 mt-1">MSME Export Platform</p>
+              <p className="text-sm text-muted-foreground mt-1">MSME Export Platform</p>
               {user && (
                 <div className="mt-2">
                   <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/20 text-primary border border-primary/30">
@@ -119,8 +119,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     href={item.href}
                     className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all ${
                       isActive
-                        ? 'bg-primary text-white shadow-glow'
-                        : 'text-slate-200 hover:bg-white/5'
+                        ? 'bg-primary text-primary-foreground shadow-glow'
+                        : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                     }`}
                     onClick={() => setSidebarOpen(false)}
                   >
@@ -130,17 +130,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 )
               })}
             </nav>
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-border">
               <div className="px-4 py-2 mb-2">
-                <p className="text-sm font-medium text-white">
+                <p className="text-sm font-medium text-foreground">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="text-xs text-slate-300">{user.email}</p>
+                <p className="text-xs text-muted-foreground">{user.email}</p>
               </div>
               <div className="space-y-1">
                 <Link
                   href="/dashboard/settings"
-                  className="flex items-center space-x-3 px-4 py-2 rounded-lg text-slate-200 hover:bg-white/5 transition-all w-full"
+                  className="flex items-center space-x-3 px-4 py-2 rounded-lg text-foreground hover:bg-accent hover:text-accent-foreground transition-all w-full"
                   onClick={() => setSidebarOpen(false)}
                 >
                   <Settings className="h-4 w-4" />
@@ -160,10 +160,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 min-h-screen overflow-y-auto bg-slate-950">
+        <main className="flex-1 min-h-screen overflow-y-auto bg-background">
           <div className="relative min-h-screen overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-950 to-black" />
-            <div className="relative p-4 sm:p-6 text-slate-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-background opacity-50" />
+            <div className="relative p-4 sm:p-6 text-foreground">
               <div className="pb-16">{children}</div>
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
           onClick={() => setSidebarOpen(false)}
         />
       )}

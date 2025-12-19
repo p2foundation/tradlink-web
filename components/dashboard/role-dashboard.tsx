@@ -6,6 +6,7 @@ import { FarmerDashboard } from './farmer-dashboard'
 import { BuyerDashboard } from './buyer-dashboard'
 import { ExportCompanyDashboard } from './export-company-dashboard'
 import { AdminDashboard } from './admin-dashboard'
+import { GovernmentDashboard } from './government-dashboard'
 import { useCurrency } from '@/contexts/currency-context'
 import { Badge } from '@/components/ui/badge'
 
@@ -27,6 +28,16 @@ export function RoleDashboard({ role, user }: RoleDashboardProps) {
         return <ExportCompanyDashboard user={user} />
       case UserRole.ADMIN:
         return <AdminDashboard user={user} />
+      case UserRole.GOVERNMENT_OFFICIAL:
+        return <GovernmentDashboard user={user} />
+      // New roles use EnhancedDashboard until specific dashboards are created
+      case UserRole.TRADER:
+      case UserRole.LOGISTICS_PROVIDER:
+      case UserRole.CUSTOMS_BROKER:
+      case UserRole.QUALITY_ASSURANCE:
+      case UserRole.FINANCIAL_INSTITUTION:
+      case UserRole.AGRIBUSINESS:
+        return <EnhancedDashboard />
       default:
         return <EnhancedDashboard />
     }

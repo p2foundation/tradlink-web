@@ -84,17 +84,17 @@ export function NotificationCenter() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <CheckCircle2 className="h-5 w-5 text-green-300" />
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />
       case 'warning':
-        return <AlertCircle className="h-5 w-5 text-amber-300" />
+        return <AlertCircle className="h-5 w-5 text-amber-500" />
       case 'match':
-        return <Handshake className="h-5 w-5 text-blue-300" />
+        return <Handshake className="h-5 w-5 text-blue-500" />
       case 'payment':
-        return <DollarSign className="h-5 w-5 text-green-300" />
+        return <DollarSign className="h-5 w-5 text-green-500" />
       case 'document':
-        return <FileText className="h-5 w-5 text-purple-300" />
+        return <FileText className="h-5 w-5 text-purple-500" />
       default:
-        return <Info className="h-5 w-5 text-blue-300" />
+        return <Info className="h-5 w-5 text-blue-500" />
     }
   }
 
@@ -116,7 +116,7 @@ export function NotificationCenter() {
   }
 
   return (
-    <Card className="shadow-lg bg-slate-900/90 border-white/10 text-slate-100">
+    <Card className="shadow-lg">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ export function NotificationCenter() {
             )}
           </div>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-slate-200">
+            <Button variant="ghost" size="sm" onClick={markAllAsRead}>
               Mark all as read
             </Button>
           )}
@@ -142,8 +142,8 @@ export function NotificationCenter() {
               key={notification.id}
               className={`p-4 rounded-lg border transition-all ${
                 !notification.read
-                  ? 'bg-slate-800 border-white/15 shadow-glow'
-                  : 'bg-slate-900 border-white/10 hover:bg-slate-800/80'
+                  ? 'bg-muted border-border shadow-sm'
+                  : 'bg-card/50 border-border hover:bg-card'
               }`}
             >
               <div className="flex items-start justify-between">
@@ -153,13 +153,13 @@ export function NotificationCenter() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm text-slate-100">{notification.title}</p>
+                      <p className="font-semibold text-sm text-foreground">{notification.title}</p>
                       {!notification.read && (
                         <div className="h-2 w-2 bg-primary rounded-full"></div>
                       )}
                     </div>
-                    <p className="text-sm text-gray-300 mt-1">{notification.message}</p>
-                    <p className="text-xs text-gray-400 mt-2">
+                    <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
+                    <p className="text-xs text-muted-foreground mt-2">
                       {formatDate(notification.timestamp)}
                     </p>
                     {notification.actionUrl && (
@@ -182,7 +182,7 @@ export function NotificationCenter() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-slate-200"
+                      className="h-8 w-8"
                       onClick={() => markAsRead(notification.id)}
                     >
                       <CheckCircle2 className="h-4 w-4" />
@@ -191,7 +191,7 @@ export function NotificationCenter() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-slate-200"
+                    className="h-8 w-8"
                     onClick={() => deleteNotification(notification.id)}
                   >
                     <X className="h-4 w-4" />
@@ -204,8 +204,8 @@ export function NotificationCenter() {
 
         {notifications.length === 0 && (
           <div className="text-center py-12">
-            <Bell className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400">No notifications</p>
+            <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No notifications</p>
           </div>
         )}
       </CardContent>

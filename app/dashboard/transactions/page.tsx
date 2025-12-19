@@ -115,18 +115,17 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Transactions</h1>
-          <p className="text-gray-300 mt-1">Deal pipeline and transaction tracking</p>
+          <h1 className="text-3xl font-bold text-foreground">Transactions</h1>
+          <p className="text-muted-foreground mt-1">Deal pipeline and transaction tracking</p>
         </div>
         {error && (
           <Button
             variant="outline"
             onClick={fetchTransactions}
             disabled={loading}
-            className="text-slate-300"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Retry
@@ -219,15 +218,15 @@ export default function TransactionsPage() {
       </div>
 
       {filteredTransactions.length === 0 && !loading && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-muted-foreground">
           No transactions found. Transactions will appear here once matches are completed.
         </div>
       )}
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-          <div className="text-sm text-gray-400">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <div className="text-sm text-muted-foreground">
             Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
             {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} transactions
           </div>

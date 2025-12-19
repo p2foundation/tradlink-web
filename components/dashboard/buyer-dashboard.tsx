@@ -135,7 +135,7 @@ export function BuyerDashboard({ user }: { user: any }) {
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
             Welcome, {user?.firstName}!
           </h1>
-          <p className="text-gray-300 mt-1">Discover verified suppliers and manage your procurement</p>
+          <p className="text-muted-foreground mt-1">Discover verified suppliers and manage your procurement</p>
         </div>
         <Link href="/dashboard/farmers">
           <Button className="shadow-glow">
@@ -147,60 +147,62 @@ export function BuyerDashboard({ user }: { user: any }) {
 
       {/* Quick Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Verified Suppliers</CardTitle>
+            <CardTitle className="text-sm font-medium">Verified Suppliers</CardTitle>
             <Users className="h-4 w-4 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.verifiedSuppliers}</div>
-            <p className="text-xs text-gray-400 mt-1">Active suppliers</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.verifiedSuppliers}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active suppliers</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Active Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
             <FileText className="h-4 w-4 text-blue-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.activeOrders}</div>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.activeOrders}</div>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="warning" className="text-xs">{stats.pendingMatches} pending</Badge>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Quality Verified</CardTitle>
+            <CardTitle className="text-sm font-medium">Quality Verified</CardTitle>
             <Shield className="h-4 w-4 text-green-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.qualityCompliance}%</div>
-            <p className="text-xs text-gray-400 mt-1">Compliance rate</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.qualityCompliance}%</div>
+            <p className="text-xs text-muted-foreground mt-1">Compliance rate</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Total Spent</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
             <TrendingUp className="h-4 w-4 text-emerald-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{formatCurrency(stats.totalSpent)}</div>
-            <p className="text-xs text-gray-400 mt-1">This year • {currency.code}</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate" title={formatCurrency(stats.totalSpent)}>
+              {formatCurrency(stats.totalSpent)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">This year • {currency.code}</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-shadow">
+        <Card className="hover:shadow-glow transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Active Shipments</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Shipments</CardTitle>
             <Truck className="h-4 w-4 text-blue-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.activeShipments}</div>
-            <p className="text-xs text-gray-400 mt-1">In transit</p>
+          <CardContent className="min-w-0">
+            <div className="text-xl sm:text-2xl font-bold text-foreground truncate">{stats.activeShipments}</div>
+            <p className="text-xs text-muted-foreground mt-1">In transit</p>
           </CardContent>
         </Card>
       </div>
@@ -208,20 +210,20 @@ export function BuyerDashboard({ user }: { user: any }) {
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/dashboard/farmers">
-          <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-all cursor-pointer h-full">
+          <Card className="hover:shadow-glow transition-all cursor-pointer h-full">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Search className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-white">Discover Suppliers</CardTitle>
-                  <p className="text-sm text-gray-400">Find verified farmers</p>
+                  <CardTitle>Discover Suppliers</CardTitle>
+                  <p className="text-sm text-muted-foreground">Find verified farmers</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-foreground">
                 Search and filter verified Ghanaian suppliers by product, quality, and certifications.
               </p>
               <div className="flex items-center gap-2 mt-4 text-primary text-sm font-medium">
@@ -232,20 +234,20 @@ export function BuyerDashboard({ user }: { user: any }) {
         </Link>
 
         <Link href="/dashboard/quality">
-          <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-all cursor-pointer h-full">
+          <Card className="hover:shadow-glow transition-all cursor-pointer h-full">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-500/10 rounded-lg">
                   <Shield className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-white">Quality Verification</CardTitle>
-                  <p className="text-sm text-gray-400">Certifications & tests</p>
+                  <CardTitle>Quality Verification</CardTitle>
+                  <p className="text-sm text-muted-foreground">Certifications & tests</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-foreground">
                 Verify supplier quality certifications, test results, and blockchain traceability.
               </p>
               <div className="flex items-center gap-2 mt-4 text-green-500 text-sm font-medium">
@@ -256,20 +258,20 @@ export function BuyerDashboard({ user }: { user: any }) {
         </Link>
 
         <Link href="/dashboard/negotiations">
-          <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-all cursor-pointer h-full">
+          <Card className="hover:shadow-glow transition-all cursor-pointer h-full">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-500/10 rounded-lg">
                   <MessageSquareText className="h-5 w-5 text-purple-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-white">Negotiations</CardTitle>
-                  <p className="text-sm text-gray-400">Active deals & offers</p>
+                  <CardTitle>Negotiations</CardTitle>
+                  <p className="text-sm text-muted-foreground">Active deals & offers</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-foreground">
                 Manage your active negotiations with suppliers. Make offers, counter offers, and finalize deals.
               </p>
               <div className="flex items-center gap-2 mt-4 text-purple-500 text-sm font-medium">
@@ -280,20 +282,20 @@ export function BuyerDashboard({ user }: { user: any }) {
         </Link>
 
         <Link href="/dashboard/market-intelligence">
-          <Card className="bg-slate-900 border-white/10 hover:shadow-glow transition-all cursor-pointer h-full">
+          <Card className="hover:shadow-glow transition-all cursor-pointer h-full">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-500/10 rounded-lg">
                   <TrendingUp className="h-5 w-5 text-blue-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-white">Market Intelligence</CardTitle>
-                  <p className="text-sm text-gray-400">Ghana market trends</p>
+                  <CardTitle>Market Intelligence</CardTitle>
+                  <p className="text-sm text-muted-foreground">Ghana market trends</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-foreground">
                 Access real-time pricing, demand forecasts, and market trends in Ghana.
               </p>
               <div className="flex items-center gap-2 mt-4 text-blue-500 text-sm font-medium">
@@ -306,10 +308,10 @@ export function BuyerDashboard({ user }: { user: any }) {
 
       {/* Recent Shipments */}
       {recentShipments.length > 0 && (
-        <Card className="bg-slate-900 border-white/10">
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-white">Active Shipments</CardTitle>
+              <CardTitle>Active Shipments</CardTitle>
               <Link href="/dashboard/transactions">
                 <Button variant="outline" size="sm">
                   View All
@@ -328,10 +330,10 @@ export function BuyerDashboard({ user }: { user: any }) {
       )}
 
       {/* Recent Orders */}
-      <Card className="bg-slate-900 border-white/10">
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white">Recent Orders</CardTitle>
+            <CardTitle>Recent Orders</CardTitle>
             <Link href="/dashboard/transactions">
               <Button variant="outline" size="sm">
                 View All
@@ -344,23 +346,23 @@ export function BuyerDashboard({ user }: { user: any }) {
             {recentOrders.map((order) => (
               <div
                 key={order.id}
-                className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors"
+                className="flex items-center justify-between p-4 bg-card/50 rounded-lg hover:bg-card transition-colors"
               >
                 <div className="flex items-center gap-4">
                   <div className="p-2 bg-primary/10 rounded-lg">
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">{order.product}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="font-medium text-foreground">{order.product}</p>
+                    <p className="text-sm text-muted-foreground">
                       {order.supplier} • {order.quantity}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">{formatDate(order.date)}</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">{formatDate(order.date)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="font-semibold text-white">{formatCurrency(order.value)}</p>
+                    <p className="font-semibold text-foreground">{formatCurrency(order.value)}</p>
                     <Badge
                       variant={
                         order.status === 'shipped'
@@ -387,9 +389,9 @@ export function BuyerDashboard({ user }: { user: any }) {
       </Card>
 
       {/* Quick Insights */}
-      <Card className="bg-slate-900 border-white/10">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-white">Quick Insights</CardTitle>
+          <CardTitle>Quick Insights</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -397,7 +399,7 @@ export function BuyerDashboard({ user }: { user: any }) {
               <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5" />
               <div className="flex-1">
                 <p className="font-medium text-blue-300">New Supplier Matches</p>
-                <p className="text-sm text-gray-300 mt-1">
+                <p className="text-sm text-foreground mt-1">
                   {stats.pendingMatches} new AI-suggested supplier matches are waiting for your review.
                 </p>
                 <Link href="/dashboard/matches">
@@ -411,7 +413,7 @@ export function BuyerDashboard({ user }: { user: any }) {
               <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5" />
               <div className="flex-1">
                 <p className="font-medium text-green-300">High Quality Compliance</p>
-                <p className="text-sm text-gray-300 mt-1">
+                <p className="text-sm text-foreground mt-1">
                   {stats.qualityCompliance}% of your orders meet international quality standards.
                 </p>
               </div>
